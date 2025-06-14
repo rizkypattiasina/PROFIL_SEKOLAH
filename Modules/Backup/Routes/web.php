@@ -19,5 +19,5 @@ Route::prefix('backup')->group(function () {
     Route::get('/download/{filename}', [BackupController::class, 'download'])->name('backup.download');
     Route::get('/delete/{filename}', [BackupController::class, 'destroy'])->name('backup.delete');
     Route::get('/restore/{filename}', [BackupController::class, 'restore'])->name('backup.restore');
-    Route::get('/testrestore/{filename}', [BackupController::class, 'testExtractZip'])->name('backup.testrestore');
+    Route::post('/upload', [BackupController::class, 'upload'])->name('backup.upload');
 });

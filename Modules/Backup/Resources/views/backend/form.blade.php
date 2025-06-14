@@ -15,7 +15,8 @@
                 <button class="btn btn-success" type="submit">Buat Backup Baru</button>
             </form>
             {{-- form this backup upload --}}
-            <form action="" method="post">
+            <form action="{{ route('backup.upload') }}" method="post" enctype="multipart/form-data">
+                @csrf
                 <hr>
                 <div class="row">
                     <div class="col-12">

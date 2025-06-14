@@ -251,4 +251,38 @@ class BackupService
             ];
         }
     }
+
+    public function uploadBackup(\Illuminate\Http\UploadedFile $file): array
+    {
+        try {
+            // Validasi file
+            if ($file->getClientOriginalExtension() !== 'zip') {
+                throw new \Exception('File harus berupa .zip.');
+            }
+
+            $filename = $file->getClientOriginalName();
+            $destinationPath = storage_path('app/backup-db');
+
+            // Pastikan direktori ada
+            if (!File::exists($destinationPath)) {
+                File::makeDirectory($destinationPath, 0755, true);
+            }
+
+            // Simpan file
+            $file->move($destinationPath, $filename);
+
+            Log::info('Backup file uploaded: ' . $filename);
+
+            return [
+                'success' => true,
+                'message' => 'File backup berhasil diunggah: ' . $filename,
+            ];
+        } catch (\Exception $e) {
+            Log::error('Upload error: ' . $e->getMessage());
+            return [
+                'success' => false,
+                'message' => 'Gagal mengunggah file backup: ' . $e->getMessage(),
+            ];
+        }
+    }
 }
