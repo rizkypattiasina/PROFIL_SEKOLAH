@@ -91,16 +91,9 @@ class BackupController extends Controller
     public function download($filename)
     {
         $path = $this->backupService->getBackupFilePath($filename);
+        
         if ($path) {
-            // Ambil nama file asli
-            $originalName = basename($path); // Misalnya, 2025-06-13_2323.zip
-
-            // Tambahkan sufiks berdasarkan timestamp untuk keunikan
-            $timestamp = now()->format('YmdHis'); // Format: 20250614110823
-            $nameParts = pathinfo($originalName);
-            $newName = "{$nameParts['filename']} ({$timestamp}).{$nameParts['extension']}";
-
-            return response()->download($path, $newName);
+            return response()->download($path);
         }
 
         return redirect()->route('backup.index')->with('error', 'File backup tidak ditemukan.');

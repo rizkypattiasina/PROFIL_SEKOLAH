@@ -12,9 +12,9 @@ function filterColumn(i, val) {
   if (i == 5) {
     var startDate = $('.start_date').val(),
       endDate = $('.end_date').val();
-      if (startDate !== '' && endDate !== '') {
-        filterByDate(i, startDate, endDate); // We call our filter function
-      }
+    if (startDate !== '' && endDate !== '') {
+      filterByDate(i, startDate, endDate); // We call our filter function
+    }
 
 
     $('.dt-advanced-search').dataTable().fnDraw();
@@ -97,7 +97,8 @@ $(function () {
   var dt_ajax_table = $('.datatables-ajax'),
     dt_filter_table = $('.dt-column-search'),
     dt_adv_filter_table = $('.dt-advanced-search'),
-    dt_responsive_table = $('.dt-responsive'),
+    dt_responsive_table = $('.dt-responsive').not('#backups-table'), // kecualikan untuk id selector table module backup database
+    dt_backups_table = $('#backups-table'), // Selector khusus untuk tabel backup
     assetPath = '../../../app-assets/';
 
   if ($('body').attr('data-framework') === 'laravel') {
@@ -224,7 +225,7 @@ $(function () {
 
   if (dt_responsive_table.length) {
     var dt_responsive = dt_responsive_table.DataTable({
-     
+
       columnDefs: [
         {
           className: 'control',
@@ -264,6 +265,48 @@ $(function () {
             header: function (row) {
               var data = row.data();
               return 'Details of ' + data['full_name'];
+            }
+          }),
+          type: 'column',
+          renderer: $.fn.dataTable.Responsive.renderer.tableAll({
+            tableClass: 'table'
+          })
+        }
+      },
+      language: {
+        paginate: {
+          // remove previous & next text from pagination
+          previous: '&nbsp;',
+          next: '&nbsp;'
+        }
+      }
+    });
+  }
+
+  // Datatable khusus untuk #backups-table
+  if (dt_backups_table.length) {
+    var dt_backups = dt_backups_table.DataTable({
+      pageLength: 10,
+      order: [[3, 'desc']], // Urutkan berdasarkan kolom "Dibuat Pada" (indeks 3)
+      columnDefs: [
+        { orderable: false, targets: [0, 4] }, // Nonaktifkan pengurutan untuk "No" dan "Aksi"
+        { type: 'num', targets: 3 }, // Urutkan "Dibuat Pada" sebagai angka (timestamp)
+        {
+          // Kolom No: Generate nomor urut dinamis
+          targets: 0,
+          orderable: false,
+          render: function (data, type, row, meta) {
+            return meta.row + meta.settings._iDisplayStart + 1;
+          }
+        },
+      ],
+      dom:
+        '<"d-flex justify-content-between align-items-center mx-0 row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>t<"d-flex justify-content-between mx-0 row"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6"p>>',
+      responsive: {
+        details: {
+          display: $.fn.dataTable.Responsive.display.modal({
+            header: function (row) {
+              return 'Details of Backup File';
             }
           }),
           type: 'column',

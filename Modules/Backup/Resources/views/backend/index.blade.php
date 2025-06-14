@@ -42,7 +42,7 @@
                                         <table class="dt-responsive table" id="backups-table">
                                             <thead>
                                                 <tr>
-                                                    <th>No</th>
+                                                    <th>#</th>
                                                     <th>Nama File</th>
                                                     <th>Ukuran File</th>
                                                     <th>Dibuat Pada</th>
@@ -52,10 +52,10 @@
                                             <tbody>
                                                 @foreach ($backups as $key => $backup)
                                                     <tr>
-                                                        <td>{{ $key + 1 }}</td>
+                                                        <td></td>
                                                         <td class="p-2">{{ $backup['filename'] }}</td>
                                                         <td class="p-2">{{ $backup['formatted_size'] }}</td>
-                                                        <td class="p-2">{{ $backup['formatted_date'] }}</td>
+                                                        <td class="p-2" data-order="{{ $backup['modified_at'] }}" >{{ $backup['formatted_date'] }}</td>
                                                         <td class="p-2">
                                                             <div class="btn-group btn-group-sm" role="group"
                                                                 aria-label="Basic example">
