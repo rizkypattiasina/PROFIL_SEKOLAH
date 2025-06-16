@@ -159,6 +159,12 @@
                 </ul>
             </li>
 
+             <li class=" nav-item {{ (request()->is('backup')) ? 'active' : '' }}">
+                <a class="d-flex align-items-center" href="{{ route('backup.index') }}"><i data-feather="database"></i>
+                    <span class="menu-title text-truncate" data-i18n="Backup">Backup</span>
+                </a>
+            </li>
+
             {{-- MENU GURU --}}
             @elseif(Auth::user()->role == 'Guru')
             <li class=" nav-item">
