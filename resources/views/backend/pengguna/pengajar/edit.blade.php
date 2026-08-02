@@ -70,10 +70,32 @@
                                 <div class="col-6">
                                     <div class="form-group">
                                         <label for="basicInput">Mengajar</label> <span class="text-danger">*</span>
-                                        <select name="mengajar" class="form-control @error('mengajar') is-invalid @enderror">
-                                            <option value="">-- Pilih --</option>
-                                            <option value="Matematika" {{$pengajar->userDetail->mengajar == 'Matematika' ? 'selected' : ''}} >Matematika</option>
-                                        </select>
+<select name="mengajar" class="form-control">
+    <option value="">-- Pilih Mata Pelajaran --</option>
+
+    @foreach ([
+        'Matematika',
+        'Bahasa Indonesia',
+        'Bahasa Inggris',
+        'Pendidikan Agama Islam',
+        'PPKn',
+        'Fisika',
+        'Kimia',
+        'Biologi',
+        'Ekonomi',
+        'Geografi',
+        'Sosiologi',
+        'Sejarah',
+        'Informatika',
+        'PJOK',
+        'Seni Budaya'
+    ] as $mapel)
+        <option value="{{ $mapel }}"
+            {{ old('mengajar', $userDetail->mengajar ?? '') === $mapel ? 'selected' : '' }}>
+            {{ $mapel }}
+        </option>
+    @endforeach
+</select>
                                         @error('mengajar')
                                             <div class="invalid-feedback">
                                             <strong>{{ $message }}</strong>

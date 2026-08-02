@@ -6,6 +6,35 @@
 
 @section('content')
 
+{{-- Summernote CSS --}}
+<link
+    href="https://cdn.jsdelivr.net/npm/summernote@0.8.20/dist/summernote-bs4.min.css"
+    rel="stylesheet"
+>
+
+<style>
+    .note-editor.note-frame {
+        border: 1px solid #d8d6de;
+        border-radius: 0.357rem;
+    }
+
+    .note-editable {
+        min-height: 400px;
+        background: #ffffff;
+    }
+
+    .preview-thumbnail {
+        display: none;
+        width: 100%;
+        max-width: 350px;
+        height: 200px;
+        margin-top: 12px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        object-fit: cover;
+    }
+</style>
+
     @if ($message = Session::get('success'))
         <div class="alert alert-success" role="alert">
             <div class="alert-body">
@@ -100,10 +129,10 @@
                                 </div>
                                 <div class="col-12">
                                     <div class="form-group">
-                                        <label for="basicInput">Content</label> <span class="text-danger">*</span>
-                                        <textarea name="content" class="form-control  @error('content') is-invalid @enderror" cols="30" rows="10">{{$berita->content}}</textarea>
+                                        <label for="summernote">Content</label> <span class="text-danger">*</span>
+                                        <textarea id="summernote" name="content" class="form-control @error('content') is-invalid @enderror">{{$berita->content}}</textarea>
                                         @error('content')
-                                            <div class="invalid-feedback">
+                                            <div class="invalid-feedback d-block">
                                             <strong>{{ $message }}</strong>
                                             </div>
                                         @enderror
@@ -120,4 +149,151 @@
         </div>
     </div>
 </div>
+
+{{-- Summernote JavaScript --}}
+<script src="https://cdn.jsdelivr.net/npm/summernote@0.8.20/dist/summernote-bs4.min.js"></script>
+
+<script>
+    $(document).ready(function () {
+        const summernote = $('#summernote');
+
+        summernote.summernote({
+            height: 450,
+            minHeight: 300,
+            maxHeight: null,
+            focus: false,
+            placeholder: 'Tulis isi berita di sini...',
+
+            fontNames: [
+                'Arial',
+                'Arial Black',
+                'Calibri',
+                'Courier New',
+                'Georgia',
+                'Helvetica',
+                'Tahoma',
+                'Times New Roman',
+                'Trebuchet MS',
+                'Verdana'
+            ],
+
+            fontNamesIgnoreCheck: [
+                'Arial',
+                'Calibri',
+                'Helvetica',
+                'Times New Roman'
+            ],
+
+            toolbar: [
+                ['history', ['undo', 'redo']],
+                ['style', ['style']],
+                ['font', ['fontname', 'fontsize', 'bold', 'italic', 'underline', 'strikethrough', 'clear']],
+                ['color', ['color', 'highlight']],
+                ['paragraph', ['ul', 'ol', 'paragraph']],
+                ['alignment', ['justifyLeft', 'justifyCenter', 'justifyRight', 'justifyFull']],
+                ['insert', ['link', 'picture', 'video', 'table', 'hr']],
+                ['view', ['fullscreen', 'codeview', 'help']]
+            ],
+
+            callbacks: {
+                onImageUpload: function (files) {
+                    Array.from(files).forEach(function (file) {
+                        uploadGambarKonten(file);
+                    });
+                },
+
+                onMediaDelete: function (target) {
+                    const imageUrl = target.attr('src');
+
+                    if (imageUrl) {
+                        hapusGambarKonten(imageUrl);
+                    }
+                }
+            }
+        });
+
+        function uploadGambarKonten(file) {
+            const allowedTypes = [
+                'image/jpeg',
+                'image/png',
+                'image/jpg',
+                'image/webp'
+            ];
+
+            if (!allowedTypes.includes(file.type)) {
+                alert('Gambar harus berformat JPG, JPEG, PNG, atau WebP.');
+                return;
+            }
+
+            const maxSize = 5 * 1024 * 1024;
+
+            if (file.size > maxSize) {
+                alert('Ukuran gambar maksimal 5 MB.');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('image', file);
+            formData.append('_token', '{{ csrf_token() }}');
+
+            $.ajax({
+                url: '{{ route('backend-berita.upload-image') }}',
+                method: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+
+                beforeSend: function () {
+                    summernote.summernote('disable');
+                },
+
+                success: function (response) {
+                    summernote.summernote('enable');
+
+                    if (response.url) {
+                        summernote.summernote(
+                            'insertImage',
+                            response.url,
+                            function ($image) {
+                                $image.attr('alt', 'Gambar berita');
+                                $image.addClass('img-fluid');
+                                $image.css({
+                                    maxWidth: '100%',
+                                    height: 'auto'
+                                });
+                            }
+                        );
+                    }
+                },
+
+                error: function (xhr) {
+                    summernote.summernote('enable');
+
+                    let message = 'Gambar gagal diunggah.';
+
+                    if (
+                        xhr.responseJSON &&
+                        xhr.responseJSON.message
+                    ) {
+                        message = xhr.responseJSON.message;
+                    }
+
+                    alert(message);
+                }
+            });
+        }
+
+        function hapusGambarKonten(imageUrl) {
+            $.ajax({
+                url: '{{ route('backend-berita.delete-image') }}',
+                method: 'POST',
+                data: {
+                    _token: '{{ csrf_token() }}',
+                    image_url: imageUrl
+                }
+            });
+        }
+    });
+</script>
+
 @endsection

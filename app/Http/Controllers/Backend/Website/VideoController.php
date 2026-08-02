@@ -3,125 +3,167 @@
 namespace App\Http\Controllers\Backend\Website;
 
 use App\Http\Controllers\Controller;
-use App\Models\Video;
-use Illuminate\Http\Request;
 use App\Http\Requests\VideoRequest;
-use ErrorException;
-use Session;
+use App\Models\Video;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\View\View;
+use Throwable;
 
 class VideoController extends Controller
 {
     /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
+     * Menampilkan seluruh data video.
      */
-    public function index()
+    public function index(): View
     {
-        $video = Video::all();
-        return view('backend.website.content.video.index', compact('video'));
+        $video = Video::latest()->get();
+
+        return view(
+            'backend.website.content.video.index',
+            compact('video')
+        );
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Menampilkan form tambah video.
      *
-     * @return \Illuminate\Http\Response
+     * Jika form tambah berada di halaman index,
+     * method ini boleh tetap mengarah ke index.
      */
-    public function create()
+    public function create(): RedirectResponse
     {
-        //
+        return redirect()->route('backend-video.index');
     }
 
     /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * Menyimpan video baru.
      */
-    public function store(VideoRequest $request)
+    public function store(VideoRequest $request): RedirectResponse
     {
+        $validated = $request->validated();
+
         try {
-            if ($request->is_active == '0') {
-                $video = Video::where('is_active','0')->update([
-                    'is_active' => '1'
+            DB::transaction(function () use ($validated) {
+                /*
+                 * Berdasarkan kode lama:
+                 * nilai 0 dianggap sebagai video yang sedang aktif.
+                 *
+                 * Jika video baru dibuat aktif, video aktif lain
+                 * diubah menjadi tidak aktif.
+                 */
+                if ((string) $validated['is_active'] === '0') {
+                    Video::where('is_active', '0')
+                        ->update([
+                            'is_active' => '1',
+                        ]);
+                }
+
+                Video::create([
+                    'title' => $validated['title'],
+                    'desc' => $validated['desc'],
+                    'url' => $validated['url'],
+                    'is_active' => $validated['is_active'],
                 ]);
-            }
+            });
 
-            $video = new Video;
-            $video->title       = $request->title;
-            $video->desc        = $request->desc;
-            $video->url         = $request->url;
-            $video->is_active   = $request->is_active;
-            $video->save();
+            return redirect()
+                ->route('backend-video.index')
+                ->with('success', 'Video berhasil ditambahkan.');
+        } catch (Throwable $e) {
+            report($e);
 
-            Session::flash('success','Video Berhasil ditambah !');
-            return redirect()->route('backend-video.index');
-        } catch (ErrorException $e) {
-            throw new ErrorException($e->getMessage());
+            return redirect()
+                ->back()
+                ->withInput()
+                ->with('error', 'Video gagal ditambahkan. Silakan coba kembali.');
         }
     }
 
     /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * Menampilkan detail video.
      */
-    public function show($id)
+    public function show(int $id): RedirectResponse
     {
-        //
+        return redirect()->route('backend-video.index');
     }
 
     /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * Menampilkan form edit video.
      */
-    public function edit($id)
+    public function edit(int $id): View
     {
-        $video = Video::find($id);
-        return view('backend.website.content.video.edit', compact('video'));
+        $video = Video::findOrFail($id);
+
+        return view(
+            'backend.website.content.video.edit',
+            compact('video')
+        );
     }
 
     /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * Memperbarui data video.
      */
-    public function update(Request $request, $id)
+    public function update(VideoRequest $request, int $id): RedirectResponse
     {
+        $validated = $request->validated();
+
         try {
-            if ($request->is_active == '0') {
-                $video = Video::where('is_active','0')->update([
-                    'is_active' => '1'
+            DB::transaction(function () use ($validated, $id) {
+                $video = Video::findOrFail($id);
+
+                /*
+                 * Jika video ini diaktifkan, nonaktifkan video aktif lain.
+                 * Video yang sedang diperbarui dikecualikan.
+                 */
+                if ((string) $validated['is_active'] === '0') {
+                    Video::where('id', '!=', $video->id)
+                        ->where('is_active', '0')
+                        ->update([
+                            'is_active' => '1',
+                        ]);
+                }
+
+                $video->update([
+                    'title' => $validated['title'],
+                    'desc' => $validated['desc'],
+                    'url' => $validated['url'],
+                    'is_active' => $validated['is_active'],
                 ]);
-            }
+            });
 
-            $video = Video::find($id);
-            $video->title       = $request->title ?? $video->title;
-            $video->desc        = $request->desc ?? $video->desc;
-            $video->url         = $request->url ?? $video->url;
-            $video->is_active   = $request->is_active;
-            $video->save();
+            return redirect()
+                ->route('backend-video.index')
+                ->with('success', 'Video berhasil diperbarui.');
+        } catch (Throwable $e) {
+            report($e);
 
-            Session::flash('success','Video Berhasil diupdate !');
-            return redirect()->route('backend-video.index');
-        } catch (ErrorException $e) {
-            throw new ErrorException($e->getMessage());
+            return redirect()
+                ->back()
+                ->withInput()
+                ->with('error', 'Video gagal diperbarui. Silakan coba kembali.');
         }
     }
 
     /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * Menghapus video.
      */
-    public function destroy($id)
+    public function destroy(int $id): RedirectResponse
     {
-        //
+        try {
+            $video = Video::findOrFail($id);
+            $video->delete();
+
+            return redirect()
+                ->route('backend-video.index')
+                ->with('success', 'Video berhasil dihapus.');
+        } catch (Throwable $e) {
+            report($e);
+
+            return redirect()
+                ->back()
+                ->with('error', 'Video gagal dihapus.');
+        }
     }
 }

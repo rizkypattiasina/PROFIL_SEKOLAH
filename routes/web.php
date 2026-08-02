@@ -16,7 +16,10 @@ use Illuminate\Support\Facades\Auth;
 
 // ======= FRONTEND ======= \\
 
-Route::get('/','Frontend\IndexController@index');
+Route::get(
+    '/',
+    [App\Http\Controllers\Frontend\IndexController::class, 'index']
+)->name('frontend.home');
 
     ///// MENU \\\\\
         //// PROFILE SEKOLAH \\\\
@@ -61,47 +64,101 @@ Route::middleware('auth')->group(function () {
     /// CHANGE PASSWORD
     Route::put('profile-settings/change-password/{id}',[App\Http\Controllers\Backend\ProfileController::class, 'changePassword'])->name('profile.change-password');
 
-    Route::prefix('/')->middleware('role:Admin')->group( function (){
-        ///// WEBSITE \\\\\
+Route::prefix('/')
+    ->middleware('role:Admin')
+    ->group(function () {
+
+        /*
+        |--------------------------------------------------------------------------
+        | Upload gambar berita
+        |--------------------------------------------------------------------------
+        */
+
+        Route::post(
+            'backend-berita/upload-image',
+            [
+                App\Http\Controllers\Backend\Website\BeritaController::class,
+                'uploadImage'
+            ]
+        )->name('backend-berita.upload-image');
+
+        Route::post(
+            'backend-berita/delete-image',
+            [
+                App\Http\Controllers\Backend\Website\BeritaController::class,
+                'deleteImage'
+            ]
+        )->name('backend-berita.delete-image');
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Website
+        |--------------------------------------------------------------------------
+        */
+
         Route::resources([
-            /// PROFILE SEKOLAH \\
-            'backend-profile-sekolah'   => Backend\Website\ProfilSekolahController::class,
-            /// VISI & MISI \\\
-            'backend-visimisi'  => Backend\Website\VisidanMisiController::class,
-            //// PROGRAM STUDI \\\\
-            'program-studi' =>  Backend\Website\ProgramController::class,
-            /// KEGIATAN \\\
-            'backend-kegiatan' => Backend\Website\KegiatanController::class,
-            /// IMAGE SLIDER \\\
-            'backend-imageslider' => Backend\Website\ImageSliderController::class,
-            /// ABOUT \\\
-            'backend-about' => Backend\Website\AboutController::class,
-            /// VIDEO \\\
-            'backend-video' => Backend\Website\VideoController::class,
-            /// KATEGORI BERITA \\\
-            'backend-kategori-berita'   => Backend\Website\KategoriBeritaController::class,
-            /// BERITA \\\
-            'backend-berita' => Backend\Website\BeritaController::class,
-            /// EVENT \\\
-            'backend-event' => Backend\Website\EventsController::class,
-            /// FOOTER \\\
-            'backend-footer'    => Backend\Website\FooterController::class,
+            'backend-profile-sekolah'
+                => Backend\Website\ProfilSekolahController::class,
+
+            'backend-visimisi'
+                => Backend\Website\VisidanMisiController::class,
+
+            'program-studi'
+                => Backend\Website\ProgramController::class,
+
+            'backend-kegiatan'
+                => Backend\Website\KegiatanController::class,
+
+            'backend-imageslider'
+                => Backend\Website\ImageSliderController::class,
+
+            'backend-about'
+                => Backend\Website\AboutController::class,
+
+            'backend-video'
+                => Backend\Website\VideoController::class,
+
+            'backend-kategori-berita'
+                => Backend\Website\KategoriBeritaController::class,
+
+            'backend-berita'
+                => Backend\Website\BeritaController::class,
+
+            'backend-event'
+                => Backend\Website\EventsController::class,
+
+            'backend-footer'
+                => Backend\Website\FooterController::class,
         ]);
 
-        ///// PENGGUNA \\\\\
+
+        /*
+        |--------------------------------------------------------------------------
+        | Pengguna
+        |--------------------------------------------------------------------------
+        */
+
         Route::resources([
-            /// PENGAJAR \\\
-            'backend-pengguna-pengajar' => Backend\Pengguna\PengajarController::class,
-            /// STAF \\\
-            'backend-pengguna-staf' => Backend\Pengguna\StafController::class,
-            /// MURID \\\
-            'backend-pengguna-murid' => Backend\Pengguna\MuridController::class,
-            /// PPDB \\\
-            'backend-pengguna-ppdb' => Backend\Pengguna\PPDBController::class,
-            /// PERPUSTAKAAN \\\
-            'backend-pengguna-perpus' => Backend\Pengguna\PerpusController::class,
-            /// BENDAHARA \\\
-            'backend-pengguna-bendahara'  => Backend\Pengguna\BendaharaController::class
+            'backend-pengguna-pengajar'
+                => Backend\Pengguna\PengajarController::class,
+
+            'backend-pengguna-staf'
+                => Backend\Pengguna\StafController::class,
+
+            'backend-pengguna-murid'
+                => Backend\Pengguna\MuridController::class,
+
+            'backend-pengguna-ppdb'
+                => Backend\Pengguna\PPDBController::class,
+
+            'backend-pengguna-perpus'
+                => Backend\Pengguna\PerpusController::class,
+
+            'backend-pengguna-bendahara'
+                => Backend\Pengguna\BendaharaController::class,
         ]);
-    });
-});
+
+    }); // menutup group role:Admin
+
+}); // menutup group auth

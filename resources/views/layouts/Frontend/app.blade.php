@@ -37,7 +37,11 @@
         <!-- About 1 Area End Here -->
 
         <!-- Video Area Start Here -->
-            @yield('video')
+            <section class="modern-video-section">
+    <div class="container">
+        @yield('video')
+    </div>
+</section>
         <!-- Video Area End Here -->
 
         <!-- Lecturers Area Start Here -->

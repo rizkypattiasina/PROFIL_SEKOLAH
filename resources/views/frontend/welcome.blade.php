@@ -16,9 +16,9 @@
     @endsection
 
     {{-- Video --}}
-    @section('video')
-        @include('frontend.content.video')
-    @endsection
+@section('video')
+    @include('frontend.content.video')
+@endsection
 
     {{-- Guru --}}
     @section('guru')

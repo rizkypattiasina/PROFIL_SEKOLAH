@@ -10,4 +10,15 @@ class Video extends Model
     use HasFactory;
 
     protected $table = 'videos';
+
+    protected $fillable = [
+        'title',
+        'desc',
+        'url',
+        'is_active',
+    ];
+
+    protected $casts = [
+        'is_active' => 'integer',
+    ];
 }

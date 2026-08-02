@@ -69,10 +69,30 @@
                                 <div class="col-6">
                                     <div class="form-group">
                                         <label for="basicInput">Mengajar</label> <span class="text-danger">*</span>
-                                        <select name="mengajar" class="form-control @error('mengajar') is-invalid @enderror">
-                                            <option value="">-- Pilih --</option>
-                                            <option value="Matematika">Matematika</option>
-                                        </select>
+   <select name="mengajar" class="form-control @error('mengajar') is-invalid @enderror">
+    <option value="">-- Pilih Mata Pelajaran --</option>
+
+    @foreach ([
+        'Pendidikan Agama Islam',
+        'Pendidikan Agama Kristen',
+        'Pendidikan Pancasila',
+        'Bahasa Indonesia',
+        'Matematika',
+        'Ilmu Pengetahuan Alam',
+        'Ilmu Pengetahuan Sosial',
+        'Bahasa Inggris',
+        'Informatika',
+        'Pendidikan Jasmani, Olahraga, dan Kesehatan',
+        'Seni Budaya',
+        'Prakarya',
+        'Muatan Lokal'
+    ] as $mapel)
+        <option value="{{ $mapel }}"
+            {{ old('mengajar') === $mapel ? 'selected' : '' }}>
+            {{ $mapel }}
+        </option>
+    @endforeach
+</select>
                                         @error('mengajar')
                                             <div class="invalid-feedback">
                                             <strong>{{ $message }}</strong>
@@ -120,7 +140,11 @@
                                 <div class="col-3">
                                     <div class="form-group">
                                         <label for="basicInput">Linkedln</label>
-                                        <input type="text" class="form-control @error('linkedln') is-invalid @enderror" name="linkedln" value=" {{old('linkidln')}} " placeholder="Linkedln" />
+                                        <input type="text"
+    class="form-control @error('linkedln') is-invalid @enderror"
+    name="linkedln"
+    value="{{ old('linkedln') }}"
+    placeholder="LinkedIn"/>
                                         @error('linkedln')
                                             <div class="invalid-feedback">
                                             <strong>{{ $message }}</strong>
