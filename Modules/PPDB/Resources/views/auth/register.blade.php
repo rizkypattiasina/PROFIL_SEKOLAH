@@ -47,7 +47,7 @@
             <div class="content-body">
                 <div class="auth-wrapper auth-v2">
                     <div class="auth-inner row m-0">
-                        <!-- Brand logo--><a class="brand-logo" href="/">
+                        <!-- Brand logo--><a class="brand-logo" href="{{ route('frontend.home') }}">
                             <svg viewBox="0 0 139 95" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" height="28">
                                 <defs>
                                     <lineargradient id="linearGradient-1" x1="100%" y1="10.5120544%" x2="50%" y2="89.4879456%">
@@ -91,8 +91,8 @@
                                     </div>
                                 @endif
                                 <h2 class="card-title font-weight-bold mb-1">Welcome to SekolahKu! 👋</h2>
-                                <p class="card-text mb-2">Pendaftaran PPDB MK Yadika Natar</p>
-                                <form class="auth-login-form mt-2" action="{{route('register.store')}}" method="POST">
+                                <p class="card-text mb-2">Pendaftaran PPDB SMA Plus Muhammadiyah Merauke</p>
+                                <form class="auth-login-form mt-2" action="{{route('ppdb.register.store')}}" method="POST">
                                     @csrf
                                     <div class="form-group">
                                         <label class="form-label">Nama Lengkap</label>

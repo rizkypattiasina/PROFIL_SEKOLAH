@@ -11,6 +11,9 @@ use ErrorException;
 use Session;
 use DB;
 use Validator;
+use Illuminate\Support\Str;
+use Modules\SPP\Entities\PaymentSpp;
+use Modules\SPP\Services\SppBillingService;
 
 class MuridController extends Controller
 {
@@ -75,14 +78,20 @@ class MuridController extends Controller
             }
 
             // Pilih kalimat
-            $kalimatKe  = "1";
-            $username   = implode(" ", array_slice(explode(" ", $request->name), 0, $kalimatKe)); // ambil kalimat
+            $baseUsername = Str::slug(Str::before(trim($request->name), ' '), '');
+            $baseUsername = $baseUsername ?: 'murid';
+            $username = $baseUsername;
+            $suffix = 1;
+            while (User::where('username', $username)->exists()) {
+                $username = $baseUsername.$suffix++;
+            }
 
             $murid = new User();
             $murid->name            = $request->name;
             $murid->username        = $username;
             $murid->email           = $request->email;
             $murid->role            = 'Guest';
+            $murid->status          = 'Aktif';
             $murid->foto_profile    = $nama_img ?? '';
             $murid->password        = bcrypt( $request->password);
             $murid->save();
@@ -173,6 +182,17 @@ class MuridController extends Controller
 
             DB::table('model_has_roles')->where('model_id',$id)->delete();
             $murid->assignRole($request->role);
+
+            if ($request->role === 'Murid') {
+                $detail = dataMurid::where('user_id', $id)->first();
+                if ($detail) {
+                    $detail->proses = 'Murid';
+                    $detail->save();
+                }
+                app(SppBillingService::class)->ensureForStudent($murid, (int) date('Y'));
+            } else {
+                PaymentSpp::where('user_id', $id)->update(['is_active' => 0]);
+            }
 
             DB::commit();
             Session::flash('success','Calon Murid Berhasil diupdate !');

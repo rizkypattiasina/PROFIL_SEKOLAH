@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class ProfileSettingsRequest extends FormRequest
 {
@@ -24,10 +25,10 @@ class ProfileSettingsRequest extends FormRequest
     public function rules()
     {
         return [
-            'name'          => ['required'],
-            'username'      => ['required'],
-            'email'         => ['required','email'],
-            'foto_profile'  => ['image','max:1024']
+            'name'          => ['required', 'string', 'max:255'],
+            'username'      => ['required', 'string', 'max:255', Rule::unique('users')->ignore($this->user()->id)],
+            'email'         => ['required','email', 'max:255', Rule::unique('users')->ignore($this->user()->id)],
+            'foto_profile'  => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:1024']
         ];
     }
 

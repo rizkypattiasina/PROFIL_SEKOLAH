@@ -25,6 +25,11 @@
         @include('frontend.content.guru')
     @endsection
 
+    {{-- Media Sosial --}}
+    @section('socialMedia')
+        @include('frontend.content.socialMedia')
+    @endsection
+
      {{-- Berita & Event --}}
      @section('beritaEvent')
         @include('frontend.content.beritaEvent')

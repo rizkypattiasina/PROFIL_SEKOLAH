@@ -1,119 +1,24 @@
-<div class="faq-page-area">
+<section id="alur" class="faq-page-area ppdb-managed-section">
     <div class="container">
-        <h1 class="about-title">Kenapa Harus SMK Yadika Natar ?</h1>
-        <div class="row panel-group" id="faq-accordian">
-            <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
-                <div class="faq-box-wrapper">
-                    <div class="faq-box-item panel panel-default">
-                        <div class="panel-heading active">
-                            <div class="panel-title faq-box-title">
-                                <h3>
-                                    <a aria-expanded="false" class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#accordion" href="#collapseOne">
-                                        <span class="faq-box-count">1</span>Terakreditasi A
-                                    </a>
-                                </h3>
-                            </div>
-                        </div>
-                        <div aria-expanded="false" id="collapseOne" role="tabpanel" class="panel-collapse collapse in">
-                            <div class="panel-body faq-box-body">
-                                <p>Dorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuriesthe leap into electronic.</p>
-                            </div>
+        <span class="ppdb-section-kicker">Tahapan Pendaftaran</span>
+        <h1 class="about-title">Alur PPDB Online</h1>
+        <p class="about-sub-title">Ikuti setiap tahap agar data pendaftaran dapat diverifikasi oleh petugas.</p>
+        <div class="row">
+            @forelse($ppdbContents->get('alur', collect()) as $index => $item)
+                <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+                    <div class="faq-box-wrapper">
+                        <div class="faq-box-item panel panel-default">
+                            <div class="panel-heading active"><div class="panel-title faq-box-title"><h3>
+                                <span class="faq-box-count">{{ $index + 1 }}</span>{{ $item->title }}
+                            </h3></div></div>
+                            <div class="panel-collapse collapse in"><div class="panel-body faq-box-body"><p>{{ $item->content }}</p></div></div>
                         </div>
                     </div>
                 </div>
-                <div class="faq-box-wrapper">
-                    <div class="faq-box-item panel panel-default">
-                        <div class="panel-heading">
-                            <div class="panel-title faq-box-title">
-                                <h3>
-                                    <a aria-expanded="false" class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#accordion" href="#collapseTwo">
-                                        <span class="faq-box-count">2</span>Memiliki Fasilitas Yang Lengkap.
-                                    </a>
-                                </h3>
-                            </div>
-                        </div>
-                        <div aria-expanded="false" id="collapseTwo" role="tabpanel" class="panel-collapse collapse">
-                            <div class="panel-body faq-box-body">
-                                <p>Dorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuriesthe leap into electronic.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="faq-box-wrapper">
-                    <div class="faq-box-item panel panel-default">
-                        <div class="panel-heading">
-                            <div class="panel-title faq-box-title">
-                                <h3>
-                                    <a aria-expanded="false" class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#accordion" href="#collapseThree">
-                                        <span class="faq-box-count">3</span>Pengajar S1 dan S2 dari lulusan kampus ternama.
-                                    </a>
-                                </h3>
-                            </div>
-                        </div>
-                        <div aria-expanded="false" id="collapseThree" role="tabpanel" class="panel-collapse collapse">
-                            <div class="panel-body faq-box-body">
-                                <p>Dorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuriesthe leap into electronic.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
-                <div class="faq-box-wrapper">
-                    <div class="faq-box-item panel panel-default">
-                        <div class="panel-heading">
-                            <div class="panel-title faq-box-title">
-                                <h3>
-                                    <a aria-expanded="false" class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#accordion" href="#collapseFour">
-                                        <span class="faq-box-count">4</span>Beasiswa Sekolah dan Kampus.
-                                    </a>
-                                </h3>
-                            </div>
-                        </div>
-                        <div aria-expanded="false" id="collapseFour" role="tabpanel" class="panel-collapse collapse">
-                            <div class="panel-body faq-box-body">
-                                <p>Dorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuriesthe leap into electronic.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="faq-box-wrapper">
-                    <div class="faq-box-item panel panel-default">
-                        <div class="panel-heading">
-                            <div class="panel-title faq-box-title">
-                                <h3>
-                                    <a aria-expanded="false" class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#accordion" href="#collapseFive">
-                                        <span class="faq-box-count">5</span>Alumni siap kerja, siap kuliah dan siap berwirausaha.
-                                    </a>
-                                </h3>
-                            </div>
-                        </div>
-                        <div aria-expanded="false" id="collapseFive" role="tabpanel" class="panel-collapse collapse">
-                            <div class="panel-body faq-box-body">
-                                <p>Dorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuriesthe leap into electronic.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="faq-box-wrapper">
-                    <div class="faq-box-item panel panel-default">
-                        <div class="panel-heading">
-                            <div class="panel-title faq-box-title">
-                                <h3>
-                                    <a aria-expanded="false" class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#accordion" href="#collapseSix">
-                                        <span class="faq-box-count">6</span>Memiliki segudang prestasi.
-                                    </a>
-                                </h3>
-                            </div>
-                        </div>
-                        <div aria-expanded="false" id="collapseSix" role="tabpanel" class="panel-collapse collapse">
-                            <div class="panel-body faq-box-body">
-                                <p>Dorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuriesthe leap into electronic.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            @empty
+                <div class="col-xs-12"><div class="alert alert-info">Alur pendaftaran sedang diperbarui.</div></div>
+            @endforelse
         </div>
+        <div class="text-center" style="margin-top: 20px;"><a href="{{ route('ppdb.register') }}" class="default-big-btn">Mulai Pendaftaran</a></div>
     </div>
-</div>
+</section>

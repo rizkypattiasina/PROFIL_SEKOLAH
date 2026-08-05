@@ -94,8 +94,7 @@
                                                 <div class="form-group">
                                                     <label for="basicInput">Status</label>
                                                     <select name="is_active" class="form-control @error('is_active') is-invalid @enderror">
-                                                        <option value="">-- Pilih --</option>
-                                                        <option value="0">Aktif</option>
+                                                        <option value="0" {{ old('is_active', '0') === '0' ? 'selected' : '' }}>Aktif (default)</option>
                                                         <option value="1">Tidak Aktif</option>
                                                     </select>
                                                     @error('is_active')

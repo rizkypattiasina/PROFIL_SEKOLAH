@@ -1,0 +1,37 @@
+PERBAIKAN RESPONSIF V3 - SEKOLAHKU
+==================================
+
+Perbaikan ini mengatasi:
+- halaman mobile menyempit dan memiliki latar abu-abu;
+- menu hamburger menimpa atau memotong konten;
+- satu data pengajar tampil berulang karena clone carousel;
+- foto pengajar terpotong dan kartu bertumpuk;
+- tab media sosial dan footer tidak rapi pada ponsel kecil;
+- tampilan tablet/landscape yang tidak konsisten.
+
+CARA PEMASANGAN
+---------------
+1. Cadangkan folder aplikasi dan database.
+2. Ekstrak paket ke C:\xampp\htdocs\ lalu pilih Merge/Replace pada folder
+   sekolahku. Jangan ekstrak ke C:\xampp\htdocs\sekolahku karena dapat
+   menghasilkan folder sekolahku\sekolahku.
+3. Buka PowerShell atau Command Prompt:
+
+       cd C:\xampp\htdocs\sekolahku
+       C:\xampp\php\php.exe artisan optimize:clear
+
+4. Tutup tab website, buka kembali, lalu tekan Ctrl + F5.
+5. Pastikan file berikut dapat dibuka dan tidak menghasilkan 404:
+
+   http://localhost:8080/sekolahku/public/Assets/Frontend/css/responsive-modern.css
+
+6. Uji tampilan pada lebar 320, 360, 390, 414, 768, 1024, dan desktop.
+
+CATATAN
+-------
+- Bila V2 sudah terpasang dan migrasi sudah berhasil, V3 tidak membutuhkan
+  migrasi database tambahan.
+- Header mobile V3 tidak lagi menggunakan MeanMenu lama.
+- Daftar Pengajar menggunakan CSS Grid sehingga data tidak dikloning.
+- File .env tidak disertakan dalam paket, sehingga konfigurasi lokal tetap aman.
+

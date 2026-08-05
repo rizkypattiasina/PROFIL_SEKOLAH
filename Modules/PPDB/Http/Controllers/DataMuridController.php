@@ -4,169 +4,89 @@ namespace Modules\PPDB\Http\Controllers;
 
 use App\Models\dataMurid;
 use App\Models\User;
-use Illuminate\Contracts\Support\Renderable;
-use ErrorException;
 use Illuminate\Http\Request;
-use Validator;
 use Illuminate\Routing\Controller;
-use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Validator as FacadesValidator;
-use Modules\SPP\Entities\DetailPaymentSpp;
-use Modules\SPP\Entities\PaymentSpp;
-use Modules\SPP\Entities\SppSetting;
+use Illuminate\Validation\Rule;
+use Modules\PPDB\Entities\BerkasMurid;
+use Modules\PPDB\Entities\DataOrangTua;
+use Modules\SPP\Services\SppBillingService;
 
 class DataMuridController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     * @return Renderable
-     */
-    public function index()
+    private $billing;
+
+    public function __construct(SppBillingService $billing)
     {
-        $murid = User::with('muridDetail')->where('role','Guest')->get();
-        return view('ppdb::backend.dataMurid.index', compact('murid'));
+        $this->billing = $billing;
     }
 
-    /**
-     * Show the form for creating a new resource.
-     * @return Renderable
-     */
-    public function create()
+    public function index(Request $request)
     {
-        return view('ppdb::create');
+        $status = $request->query('status');
+        $allowed = ['Pendaftaran', 'Berkas', 'Murid', 'Ditolak'];
+
+        $murid = User::with('muridDetail')
+            ->whereHas('muridDetail', function ($query) use ($status, $allowed) {
+                if (in_array($status, $allowed, true)) {
+                    $query->where('proses', $status);
+                }
+            })
+            ->whereIn('role', ['Guest', 'Murid'])
+            ->latest()
+            ->paginate(30)
+            ->appends(['status' => $status]);
+
+        return view('ppdb::backend.dataMurid.index', compact('murid', 'status', 'allowed'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     * @param Request $request
-     * @return Renderable
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Show the specified resource.
-     * @param int $id
-     * @return Renderable
-     */
     public function show($id)
     {
-        $murid = User::with('muridDetail','dataOrtu','berkas')->where('role','Guest')->find($id);
-        if (!$murid->muridDetail->agama || !$murid->dataOrtu->nama_ayah || !$murid->berkas->kartu_keluarga) {
-            Session::flash('error','Calon Siswa Belum Input Biodata Diri !');
-            return redirect('/ppdb/data-murid');
-        }
-        return view('ppdb::backend.dataMurid.show',compact('murid'));
+        $murid = User::with('muridDetail')->whereIn('role', ['Guest', 'Murid'])->findOrFail($id);
+        DataOrangTua::firstOrCreate(['user_id' => $murid->id]);
+        BerkasMurid::firstOrCreate(['user_id' => $murid->id]);
+        $murid->load('dataOrtu', 'berkas');
 
+        return view('ppdb::backend.dataMurid.show', compact('murid'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     * @param int $id
-     * @return Renderable
-     */
-    public function edit($id)
-    {
-        return view('ppdb::edit');
-    }
-
-    /**
-     * Update the specified resource in storage.
-     * @param Request $request
-     * @param int $id
-     * @return Renderable
-     */
     public function update(Request $request, $id)
     {
-        try {
-            DB::beginTransaction();
-            $validator = FacadesValidator::make($request->all(), [
-                'nis'   => 'required|numeric|unique:data_murids',
-                'nisn'  => 'required|numeric|unique:data_murids',
-            ],
-            [
-                'nis.required'      => 'NIS tidak boleh kosong.',
-                'nisn.required'     => 'NISN tidak boleh kosong.',
-                'nis.numeric'       => 'NIS hanya mendukung angka.',
-                'nis.unique'        => 'NIS sudah pernah digunakan.',
-                'nisn.numeric'      => 'NISN hanya mendukung angka.',
-                'nisn.unique'       => 'NISN sudah pernah digunakan.',
-            ]
-            );
+        $murid = User::with('muridDetail', 'dataOrtu', 'berkas')
+            ->whereIn('role', ['Guest', 'Murid'])
+            ->findOrFail($id);
 
-            if ($validator->fails()) {
-                return redirect()->back()
-                    ->withErrors($validator)
-                    ->withInput();
-            }
-
-            $murid = User::find($id);
-            $murid->role = 'Murid';
-            $murid->update();
-
-            if ($murid) {
-                $data = dataMurid::where('user_id', $id)->first();
-                $data->nis      = $request->nis;
-                $data->nisn     = $request->nisn;
-                $data->proses   = $murid->role;
-                $data->update();
-
-                // create data payment
-                $this->payment($murid->id);
-            }
-
-            DB::table('model_has_roles')->where('model_id',$id)->delete();
-            $murid->assignRole($murid->role);
-
-            DB::commit();
-            Session::flash('success','Success, Data Berhasil diupdate !');
-            return redirect()->route('data-murid.index');
-        } catch (ErrorException $e) {
-            DB::rollback();
-            throw new ErrorException($e->getMessage());
-        }
-
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     * @param int $id
-     * @return Renderable
-     */
-    public function destroy($id)
-    {
-        //
-    }
-
-    // Create Data Payment
-    public function payment($murid)
-    {
-      try {
-        DB::beginTransaction();
-        $payment = PaymentSpp::create([
-          'user_id'   => $murid,
-          'year'      => date('Y'),
-          'is_active' =>  1
+        $detailId = optional($murid->muridDetail)->id;
+        $validated = $request->validate([
+            'nis' => ['required', 'digits_between:4,18', Rule::unique('data_murids', 'nis')->ignore($detailId)],
+            'nisn' => ['required', 'digits_between:8,18', Rule::unique('data_murids', 'nisn')->ignore($detailId)],
         ]);
 
-        if ($payment) {
-            $spp = SppSetting::first();
-            DetailPaymentSpp::create([
-                'payment_id'  => $payment->id,
-                'user_id'     => $murid,
-                'month'       => date('F'),
-                'amount'      => $spp->amount,
-                'status'      => 'unpaid',
-                'file'        => null,
-            ]);
+        if (! optional($murid->muridDetail)->agama || ! optional($murid->dataOrtu)->nama_ayah || ! optional($murid->berkas)->kartu_keluarga) {
+            return back()->withInput()->with('error', 'Calon murid belum melengkapi biodata, data orang tua, atau berkas.');
         }
-        DB::commit();
-      } catch (\ErrorException $e) {
-        DB::rollBack();
-        throw new ErrorException($e->getMessage());
-      }
+
+        DB::transaction(function () use ($murid, $validated) {
+            $murid->update(['role' => 'Murid', 'status' => 'Aktif']);
+            $murid->muridDetail->nis = $validated['nis'];
+            $murid->muridDetail->nisn = $validated['nisn'];
+            $murid->muridDetail->proses = 'Murid';
+            $murid->muridDetail->save();
+            $murid->syncRoles(['Murid']);
+            $this->billing->ensureForStudent($murid, (int) date('Y'));
+        });
+
+        return redirect()->route('data-murid.index', ['status' => 'Murid'])
+            ->with('success', 'Calon murid diterima dan tagihan SPP berhasil dibuat.');
+    }
+
+    public function reject($id)
+    {
+        $murid = User::with('muridDetail')->where('role', 'Guest')->findOrFail($id);
+        $murid->muridDetail->proses = 'Ditolak';
+        $murid->muridDetail->save();
+
+        return redirect()->route('data-murid.index', ['status' => 'Ditolak'])
+            ->with('success', 'Pendaftaran calon murid ditandai ditolak.');
     }
 }

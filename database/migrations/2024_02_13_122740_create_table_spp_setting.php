@@ -31,6 +31,6 @@ class CreateTableSppSetting extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('table_spp_setting');
+        Schema::dropIfExists('spp_setting');
     }
 }

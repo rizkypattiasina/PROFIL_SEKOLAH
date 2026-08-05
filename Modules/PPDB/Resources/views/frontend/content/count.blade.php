@@ -1,22 +1,19 @@
-<div class="counter-area bg-primary-deep" style="background-image: url({{asset('Assets/Frontend/img/banner/4.jpg')}});">
+<section id="berkas" class="ppdb-managed-section ppdb-requirements-section">
     <div class="container">
+        <span class="ppdb-section-kicker">Persyaratan Administrasi</span>
+        <h1 class="about-title">Berkas yang Disiapkan</h1>
+        <p class="about-sub-title">Berkas dapat diunggah dalam format JPG, JPEG, PNG, atau PDF dengan ukuran maksimal 2 MB per file.</p>
         <div class="row">
-            <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12 counter1-box wow fadeInUp" data-wow-duration=".5s" data-wow-delay=".20s">
-                <h2 class="about-counter title-bar-counter" data-num="20">20</h2>
-                <p>PENGAJAR PROFESSIONAL</p>
-            </div>
-            <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12 counter1-box wow fadeInUp" data-wow-duration=".5s" data-wow-delay=".40s">
-                <h2 class="about-counter title-bar-counter" data-num="20">20</h2>
-                <p>FASILTAS SEKOLAH</p>
-            </div>
-            <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12 counter1-box wow fadeInUp" data-wow-duration=".5s" data-wow-delay=".60s">
-                <h2 class="about-counter title-bar-counter" data-num="10">10</h2>
-                <p>EKSTRAKULIKULER</p>
-            </div>
-            <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12 counter1-box wow fadeInUp" data-wow-duration=".5s" data-wow-delay=".80s">
-                <h2 class="about-counter title-bar-counter" data-num="77">77</h2>
-                <p>MURID TERDAFTAR</p>
-            </div>
+            @forelse($ppdbContents->get('berkas', collect()) as $item)
+                <div class="col-lg-4 col-md-6 col-sm-6 col-xs-12">
+                    <div class="ppdb-requirement-card">
+                        <i class="fa fa-{{ $item->icon ?: 'file-text-o' }}"></i>
+                        <div><h3>{{ $item->title }}</h3><p>{{ $item->content }}</p></div>
+                    </div>
+                </div>
+            @empty
+                <div class="col-xs-12"><div class="alert alert-info">Daftar berkas sedang diperbarui.</div></div>
+            @endforelse
         </div>
     </div>
-</div>
+</section>

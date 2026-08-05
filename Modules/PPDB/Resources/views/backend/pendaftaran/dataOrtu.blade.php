@@ -1,185 +1,28 @@
 @extends('layouts.backend.app')
 
-@section('title')
-    Form Pendaftaran
-@endsection
+@section('title', 'Data Orang Tua PPDB')
 
 @section('content')
+@php
+    $educations = ['SD','SMP','SMA/SMK','S1','S2','S3'];
+    $fatherJobs = ['Wiraswasta','Wirausaha','ASN','Buruh'];
+    $motherJobs = ['Ibu Rumah Tangga','Wiraswasta','Wirausaha','ASN','Buruh'];
+@endphp
 <div class="content-wrapper container-xxl p-0">
-    <div class="content-header row">
-        <div class="content-header-left col-md-9 col-12 mb-2">
-            <div class="row breadcrumbs-top">
-                <div class="col-12">
-                    <h2>Form Pendaftaran PPDB SMK Yadika Natar</h2>
-                </div>
+    @if(session('success'))<div class="alert alert-success"><div class="alert-body"><strong>{{ session('success') }}</strong></div></div>@endif
+    @if(session('error'))<div class="alert alert-danger"><div class="alert-body"><strong>{{ session('error') }}</strong></div></div>@endif
+    <div class="content-header row"><div class="col-12 mb-2"><h2>2. Data Orang Tua</h2><p class="text-muted mb-0">Isi data ayah dan ibu calon murid.</p></div></div>
+    <div class="card"><div class="card-body"><form action="{{ route('ppdb.form-orangtua.update') }}" method="POST">@csrf @method('PUT')
+        @foreach(['ayah' => ['label' => 'Ayah', 'jobs' => $fatherJobs], 'ibu' => ['label' => 'Ibu', 'jobs' => $motherJobs]] as $key => $parent)
+            <h4>Data {{ $parent['label'] }}</h4><hr><div class="row">
+                <div class="col-md-6"><div class="form-group"><label>Nama {{ $parent['label'] }}</label><input type="text" name="nama_{{ $key }}" value="{{ old('nama_'.$key, $ortu->{'nama_'.$key}) }}" class="form-control @error('nama_'.$key) is-invalid @enderror" required>@error('nama_'.$key)<div class="invalid-feedback">{{ $message }}</div>@enderror</div></div>
+                <div class="col-md-6"><div class="form-group"><label>No. Telepon/WhatsApp</label><input type="text" inputmode="numeric" name="telp_{{ $key }}" value="{{ old('telp_'.$key, $ortu->{'telp_'.$key}) }}" class="form-control @error('telp_'.$key) is-invalid @enderror" required>@error('telp_'.$key)<div class="invalid-feedback">{{ $message }}</div>@enderror</div></div>
+                <div class="col-md-6"><div class="form-group"><label>Pendidikan</label><select name="pendidikan_{{ $key }}" class="form-control" required><option value="">-- Pilih --</option>@foreach($educations as $education)<option value="{{ $education }}" {{ old('pendidikan_'.$key, $ortu->{'pendidikan_'.$key}) === $education ? 'selected' : '' }}>{{ $education }}</option>@endforeach</select></div></div>
+                <div class="col-md-6"><div class="form-group"><label>Pekerjaan</label><select name="pekerjaan_{{ $key }}" class="form-control" required><option value="">-- Pilih --</option>@foreach($parent['jobs'] as $job)<option value="{{ $job }}" {{ old('pekerjaan_'.$key, $ortu->{'pekerjaan_'.$key}) === $job ? 'selected' : '' }}>{{ $job }}</option>@endforeach</select></div></div>
+                <div class="col-12"><div class="form-group"><label>Alamat {{ $parent['label'] }}</label><textarea name="alamat_{{ $key }}" rows="3" class="form-control @error('alamat_'.$key) is-invalid @enderror" required>{{ old('alamat_'.$key, $ortu->{'alamat_'.$key}) }}</textarea>@error('alamat_'.$key)<div class="invalid-feedback">{{ $message }}</div>@enderror</div></div>
             </div>
-        </div>
-    </div>
-    <div class="content-body">
-        <div class="row">
-            <div class="col-12">
-                <div class="card">
-                    <div class="card-header header-bottom">
-                        <h4>Data Ayah</h4>
-                    </div>
-                    <div class="card-body">
-                        <form action=" {{url('ppdb/form-data-orangtua', Auth::id())}} " method="post" enctype="multipart/form-data">
-                            @csrf
-                            @method('PUT')
-                            <div class="row">
-                                <div class="col-6">
-                                    <div class="form-group">
-                                        <label for="basicInput">Nama Ayah</label>
-                                        <input type="text" class="form-control @error('nama_ayah') is-invalid @enderror" name="nama_ayah" value=" {{old('nama_ayah')}} " placeholder="Nama Ayah" />
-                                        @error('nama_ayah')
-                                            <div class="invalid-feedback">
-                                            <strong>{{ $message }}</strong>
-                                            </div>
-                                        @enderror
-                                    </div>
-                                </div>
-                                <div class="col-6">
-                                    <div class="form-group">
-                                        <label for="basicInput">No Telp Ayah</label>
-                                        <input type="text" class="form-control @error('telp_ayah') is-invalid @enderror" name="telp_ayah" value=" {{old('telp_ayah')}} " placeholder="telp Ayah" />
-                                        @error('telp_ayah')
-                                            <div class="invalid-feedback">
-                                            <strong>{{ $message }}</strong>
-                                            </div>
-                                        @enderror
-                                    </div>
-                                </div>
-                                <div class="col-6">
-                                    <div class="form-group">
-                                        <label for="basicInput">Pendidikan Ayah</label>
-                                        <select name="pendidikan_ayah" class="form-control">
-                                            <option value="">-- Pilih --</option>
-                                            <option value="SD" {{old('pendidikan_ayah') == 'SD' ? 'selected' : ''}} >SD</option>
-                                            <option value="SMP" {{old('pendidikan_ayah') == 'SMP' ? 'selected' : ''}}>SMP</option>
-                                            <option value="SMA/SMK" {{old('pendidikan_ayah') == 'SMA/SMK' ? 'selected' : ''}}>SMA/SMK</option>
-                                            <option value="S1" {{old('pendidikan_ayah') == 'S1' ? 'selected' : ''}}>S1</option>
-                                            <option value="S2" {{old('pendidikan_ayah') == 'S2' ? 'selected' : ''}}>S2</option>
-                                            <option value="S3" {{old('pendidikan_ayah') == 'S3' ? 'selected' : ''}}>S3</option>
-                                        </select>
-                                        @error('pendidikan_ayah')
-                                            <div class="invalid-feedback">
-                                            <strong>{{ $message }}</strong>
-                                            </div>
-                                        @enderror
-                                    </div>
-                                </div>
-                                <div class="col-6">
-                                    <div class="form-group">
-                                        <label for="basicInput">Pekerjaan Ayah</label>
-                                        <select name="pekerjaan_ayah" class="form-control">
-                                            <option value="">-- Pilih --</option>
-                                            <option value="Wiraswasta" {{old('pekerjaan_ayah') == 'Wiraswasta' ? 'selected' : ''}} >Wiraswasta</option>
-                                            <option value="Wirausaha" {{old('pekerjaan_ayah') == 'Wirausaha' ? 'selected' : ''}}>Wirausaha</option>
-                                            <option value="ASN" {{old('pekerjaan_ayah') == 'ASN' ? 'selected' : ''}}>ASN</option>
-                                            <option value="Buruh" {{old('pekerjaan_ayah') == 'Buruh' ? 'selected' : ''}}>Buruh</option>
-                                        </select>
-                                        @error('pendidiakn_ayah')
-                                            <div class="invalid-feedback">
-                                            <strong>{{ $message }}</strong>
-                                            </div>
-                                        @enderror
-                                    </div>
-                                </div>
-                                <div class="col-12">
-                                    <div class="form-group">
-                                        <label for="basicInput">Alamat Lengkap</label>
-                                        <textarea name="alamat_ayah" class="form-control @error('alamat_ayah') is-invalid @enderror" cols="30" rows="3"> {{old('alamat_ayah')}} </textarea>
-                                        @error('alamat_ayah')
-                                            <div class="invalid-feedback">
-                                            <strong>{{ $message }}</strong>
-                                            </div>
-                                        @enderror
-                                    </div>
-                                </div>
-                            </div>
-                            <hr>
-                            {{-- Data Ibu --}}
-                            <h4>Data Ibu</h4> <br>
-                            <div class="row">
-                                <div class="col-6">
-                                    <div class="form-group">
-                                        <label for="basicInput">Nama Ibu</label>
-                                        <input type="text" class="form-control @error('nama_ibu') is-invalid @enderror" name="nama_ibu" value=" {{old('nama_ibu')}} " placeholder="Nama Ibu" />
-                                        @error('nama_ibu')
-                                            <div class="invalid-feedback">
-                                            <strong>{{ $message }}</strong>
-                                            </div>
-                                        @enderror
-                                    </div>
-                                </div>
-                                <div class="col-6">
-                                    <div class="form-group">
-                                        <label for="basicInput">No Telp Ibu</label>
-                                        <input type="text" class="form-control @error('telp_ibu') is-invalid @enderror" name="telp_ibu" value=" {{old('telp_ibu')}} " placeholder="telp Ibu" />
-                                        @error('telp_ibu')
-                                            <div class="invalid-feedback">
-                                            <strong>{{ $message }}</strong>
-                                            </div>
-                                        @enderror
-                                    </div>
-                                </div>
-                                <div class="col-6">
-                                    <div class="form-group">
-                                        <label for="basicInput">Pendidikan Ibu</label>
-                                        <select name="pendidikan_ibu" class="form-control">
-                                            <option value="">-- Pilih --</option>
-                                            <option value="SD" {{old('pendidikan_ibu') == 'SD' ? 'selected' : ''}} >SD</option>
-                                            <option value="SMP" {{old('pendidikan_ibu') == 'SMP' ? 'selected' : ''}}>SMP</option>
-                                            <option value="SMA/SMK" {{old('pendidikan_ibu') == 'SMA/SMK' ? 'selected' : ''}}>SMA/SMK</option>
-                                            <option value="S1" {{old('pendidikan_ibu') == 'S1' ? 'selected' : ''}}>S1</option>
-                                            <option value="S2" {{old('pendidikan_ibu') == 'S2' ? 'selected' : ''}}>S2</option>
-                                            <option value="S3" {{old('pendidikan_ibu') == 'S3' ? 'selected' : ''}}>S3</option>
-                                        </select>
-                                        @error('pendidikan_ibu')
-                                            <div class="invalid-feedback">
-                                            <strong>{{ $message }}</strong>
-                                            </div>
-                                        @enderror
-                                    </div>
-                                </div>
-                                <div class="col-6">
-                                    <div class="form-group">
-                                        <label for="basicInput">Pekerjaan Ibu</label>
-                                        <select name="pekerjaan_ibu" class="form-control">
-                                            <option value="">-- Pilih --</option>
-                                            <option value="Ibu Rumah Tangga" {{old('pekerjaan_ibu') == 'Ibu Rumah Tangga' ? 'selected' : ''}}>Ibu Rumah Tangga</option>
-                                            <option value="Wiraswasta" {{old('pekerjaan_ibu') == 'Wiraswasta' ? 'selected' : ''}} >Wiraswasta</option>
-                                            <option value="Wirausaha" {{old('pekerjaan_ibu') == 'Wirausaha' ? 'selected' : ''}}>Wirausaha</option>
-                                            <option value="ASN" {{old('pekerjaan_ibu') == 'ASN' ? 'selected' : ''}}>ASN</option>
-                                            <option value="Buruh" {{old('pekerjaan_ibu') == 'Buruh' ? 'selected' : ''}}>Buruh</option>
-                                        </select>
-                                        @error('pendidiakn_ibu')
-                                            <div class="invalid-feedback">
-                                            <strong>{{ $message }}</strong>
-                                            </div>
-                                        @enderror
-                                    </div>
-                                </div>
-                                <div class="col-12">
-                                    <div class="form-group">
-                                        <label for="basicInput">Alamat Lengkap</label>
-                                        <textarea name="alamat_ibu" class="form-control @error('alamat_ibu') is-invalid @enderror" cols="30" rows="3"> {{old('alamat_ibu')}} </textarea>
-                                        @error('alamat_ibu')
-                                            <div class="invalid-feedback">
-                                            <strong>{{ $message }}</strong>
-                                            </div>
-                                        @enderror
-                                    </div>
-                                </div>
-                            </div>
-                            <button class="btn btn-primary" type="submit">Simpan</button>
-                            <a href="/home" class="btn btn-warning">Batal</a>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-    </div>
+        @endforeach
+        <button class="btn btn-primary">Simpan & Lanjutkan</button><a href="{{ route('ppdb.form-pendaftaran') }}" class="btn btn-outline-secondary">Kembali</a>
+    </form></div></div>
 </div>
 @endsection

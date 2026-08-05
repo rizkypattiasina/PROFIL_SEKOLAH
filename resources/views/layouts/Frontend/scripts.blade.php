@@ -28,5 +28,12 @@
 <script src="{{asset('Assets/Frontend/js/jquery.magnific-popup.min.js')}}" type="text/javascript"></script>
 <!-- Gridrotator js -->
 <script src="{{asset('Assets/Frontend/js/jquery.gridrotator.js')}}" type="text/javascript"></script>
+<script>
+    window.schoolHomeUrl = @json(route('frontend.home'));
+    window.schoolLogoUrl = @json(!empty($footer->logo)
+        ? asset('storage/'.(\Illuminate\Support\Str::contains($footer->logo, '/') ? $footer->logo : 'images/logo/'.$footer->logo))
+        : asset('Assets/Frontend/img/logo-footer.png'));
+</script>
 <!-- Custom Js -->
 <script src="{{asset('Assets/Frontend/js/main.js')}}" type="text/javascript"></script>
+@stack('scripts')

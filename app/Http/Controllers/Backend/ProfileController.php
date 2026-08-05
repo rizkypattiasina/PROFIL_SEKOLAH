@@ -10,6 +10,7 @@ use App\Http\Requests\ProfileSettingsRequest;
 use App\Http\Requests\ChangePasswordRequest;
 use ErrorException;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Storage;
 
 class ProfileController extends Controller
 {
@@ -76,21 +77,25 @@ class ProfileController extends Controller
      */
     public function update(ProfileSettingsRequest $request, $id)
     {
+        abort_unless((int) $id === (int) Auth::id(), 403);
+
         try {
             if ($request->foto_profile) {
                 $image = $request->file('foto_profile');
-                $nama_image = time()."_".$image->getClientOriginalName();
-                // isi dengan nama folder tempat kemana file diupload
-                $tujuan_upload = 'public/images/profile';
-                $image->storeAs($tujuan_upload,$nama_image);
+                $storedImage = $image->store('images/profile', 'public');
+                $nama_image = basename($storedImage);
             }
 
-            $profile = User::find($id);
+            $profile = Auth::user();
+            if (! empty($nama_image) && $profile->foto_profile) {
+                Storage::disk('public')->delete('images/profile/'.$profile->foto_profile);
+            }
+            $emailChanged = $profile->email !== $request->email;
             $profile->name          = $request->name;
             $profile->username      = $request->username;
             $profile->email         = $request->email;
             $profile->foto_profile  = $nama_image ?? $profile->foto_profile;
-            if ($request->email) {
+            if ($emailChanged) {
                 $profile->email_verified_at  = NULL;
             }
             $profile->save();
@@ -106,8 +111,10 @@ class ProfileController extends Controller
     // Ubah Password
     public function changePassword(ChangePasswordRequest $request, $id)
     {
+       abort_unless((int) $id === (int) Auth::id(), 403);
+
        try {
-            $profile = User::find($id);
+            $profile = Auth::user();
             $profile->password   = bcrypt($request->password);
             $profile->save();
 

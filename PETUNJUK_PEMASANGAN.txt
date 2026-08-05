@@ -1,0 +1,35 @@
+UPDATE HALAMAN BERITA PROFESIONAL
+===================================
+
+Folder proyek XAMPP:
+C:\xampp\htdocs\sekolahku
+
+LANGKAH PEMASANGAN
+
+1. Tutup halaman website yang sedang terbuka.
+2. Cadangkan dua file lama berikut:
+   - resources\views\frontend\content\beritaAll.blade.php
+   - public\Assets\Frontend\style.css
+3. Salin folder "resources" dan "public" dari paket ini ke:
+   C:\xampp\htdocs\sekolahku
+4. Saat Windows bertanya, pilih "Replace the files in the destination".
+5. Buka PowerShell dan jalankan:
+
+   cd C:\xampp\htdocs\sekolahku
+   C:\xampp\php\php.exe artisan optimize:clear
+
+6. Buka kembali:
+   http://localhost:8080/sekolahku/public/berita
+7. Tekan Ctrl + F5 untuk menghapus cache CSS browser.
+
+HASIL PERBAIKAN
+
+- Semua thumbnail berita memiliki rasio 16:9 dan ukuran seragam.
+- Card pada satu baris memiliki tinggi yang sama.
+- Judul dibatasi maksimal dua baris.
+- Ringkasan berita dibatasi maksimal tiga baris.
+- Tombol baca selengkapnya sejajar di bagian bawah card.
+- Tata letak responsif untuk desktop, tablet, dan HP.
+- Sidebar kategori dan berita terbaru lebih rapi.
+- Tampilan kosong muncul dengan benar jika belum ada berita.
+

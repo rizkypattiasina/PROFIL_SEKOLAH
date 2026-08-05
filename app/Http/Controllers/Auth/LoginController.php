@@ -39,12 +39,22 @@ class LoginController extends Controller
         $this->middleware('guest')->except('logout');
     }
 
-    protected function authenticated()
+    protected function authenticated($request, $user)
     {
-        if(Auth::User()->status == 'Tidak Aktif') {
+        if ($user->status !== 'Aktif') {
             Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
             Session::flash('error', "Akun yang kamu gunakan sudah Tidak Aktif !");
-            return redirect('login');
+            return redirect()->route('login');
         }
+
+        // Kolom role menjadi sumber hak akses utama agar tidak ada role lama
+        // pada tabel model_has_roles yang masih memberikan akses.
+        $user->syncRoles([$user->role]);
+
+        $request->session()->regenerate();
+
+        return redirect()->intended(route('home'));
     }
 }

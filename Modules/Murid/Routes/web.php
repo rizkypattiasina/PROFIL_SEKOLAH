@@ -13,11 +13,9 @@
 
 use Illuminate\Support\Facades\Route;
 
-Route::prefix('murid')->middleware('role:Murid','auth')->group(function() {
+Route::prefix('murid')->middleware(['auth', 'active.user', 'role:Murid'])->group(function() {
     Route::get('/', 'MuridController@index');
 
-    Route::resources([
-      'perpustakaan'  => PerpustakaanController::class,
-      'pembayaran'    => PembayaranController::class
-    ]);
+    Route::resource('perpustakaan', PerpustakaanController::class)->only(['index']);
+    Route::resource('pembayaran', PembayaranController::class)->only(['index', 'edit', 'update']);
 });

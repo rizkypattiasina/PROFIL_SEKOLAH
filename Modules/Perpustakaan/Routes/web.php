@@ -15,7 +15,7 @@ Route::prefix('perpustakaan')->group(function() {
     Route::get('/', 'PerpustakaanController@index');
 });
 
-Route::prefix('perpus')->middleware('role:Perpustakaan')->group(function() {
+Route::prefix('perpus')->middleware(['auth', 'active.user', 'role:Perpustakaan'])->group(function() {
   Route::resources([
     // Books
     '/books'  => BooksController::class,

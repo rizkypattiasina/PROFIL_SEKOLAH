@@ -1,6 +1,6 @@
 @extends('ppdb::layouts.master')
 @section('title')
-    Penerimaan Siswa Didik Baru
+    Penerimaan Peserta Didik Baru
 @endsection
 @section('content')
     @section('slider')

@@ -4,71 +4,61 @@ namespace Modules\PPDB\Http\Controllers;
 
 use App\Models\dataMurid;
 use App\Models\User;
-use ErrorException;
-use Illuminate\Foundation\Auth\RegistersUsers;
-use App\Providers\RouteServiceProvider;
-use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Modules\PPDB\Http\Requests\RegisterRequest;
-use Session;
-use DB;
 
 class AuthController extends Controller
 {
-    use RegistersUsers;
-
-    /**
-     * Where to redirect users after registration.
-     *
-     * @var string
-     */
-    protected $redirectTo = RouteServiceProvider::HOME;
-
     public function __construct()
     {
         $this->middleware('guest');
     }
 
-    // Register View
     public function registerView()
     {
         return view('ppdb::auth.register');
     }
 
-    // Register Store
     public function registerStore(RegisterRequest $request)
     {
-        try {
-            DB::beginTransaction();
+        DB::transaction(function () use ($request) {
+            $register = User::create([
+                'name' => trim($request->name),
+                'username' => $this->uniqueUsername($request->name),
+                'email' => strtolower(trim($request->email)),
+                'role' => 'Guest',
+                'status' => 'Aktif',
+                'password' => bcrypt($request->password),
+            ]);
 
-           // Pilih kalimat
-           $kalimatKe  = "1";
-           $username   = implode(" ", array_slice(explode(" ", $request->name), 0, $kalimatKe)); // ambil kalimat
+            $detail = new dataMurid();
+            $detail->user_id = $register->id;
+            $detail->whatsapp = $request->whatsapp;
+            $detail->asal_sekolah = $request->asal_sekolah;
+            $detail->proses = 'Pendaftaran';
+            $detail->save();
 
-            $register = new User();
-            $register->name      = $request->name;
-            $register->username  = $username;
-            $register->email     = $request->email;
-            $register->role      = 'Guest';
-            $register->password  = bcrypt($request->password);
-            $register->save();
+            $register->syncRoles(['Guest']);
+        });
 
-            if ($register) {
-                $murid = new dataMurid();
-                $murid->user_id         =   $register->id;
-                $murid->whatsapp        =   $request->whatsapp;
-                $murid->asal_sekolah    =   $request->asal_sekolah;
-                $murid->save();
-            }
+        return redirect()->route('login')
+            ->with('success', 'Akun PPDB berhasil dibuat. Silakan masuk untuk melengkapi pendaftaran.');
+    }
 
-            $register->assignRole($register->role);
+    private function uniqueUsername(string $name): string
+    {
+        $base = Str::slug(Str::before(trim($name), ' '), '');
+        $base = $base ?: 'pendaftar';
+        $candidate = $base;
+        $number = 1;
 
-            DB::commit();
-            Session::flash('success','Success, Data Berhasil dikirim !');
-            return redirect()->route('login');
-        } catch (ErrorException $e) {
-            DB::rollback();
-            throw new ErrorException($e->getMessage());
+        while (User::where('username', $candidate)->exists()) {
+            $candidate = $base.$number;
+            $number++;
         }
+
+        return $candidate;
     }
 }

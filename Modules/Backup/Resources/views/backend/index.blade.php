@@ -60,11 +60,10 @@
                                                             <div class="btn-group btn-group-sm" role="group"
                                                                 aria-label="Basic example">
                                                                 <!-- Restore -->
-                                                                <a href="{{ route('backup.restore', $backup['filename']) }}"
-                                                                    onclick="return confirm('Yakin ingin merestore database? Data saat ini akan ditimpa!')"
-                                                                    class="btn btn-warning" title="Restore">
-                                                                    <i data-feather="refresh-cw"></i>
-                                                                </a>
+                                                                <form action="{{ route('backup.restore', $backup['filename']) }}" method="POST" class="d-inline" onsubmit="return confirm('Yakin ingin merestore database? Data saat ini akan ditimpa!')">
+                                                                    @csrf
+                                                                    <button class="btn btn-warning" title="Restore"><i data-feather="refresh-cw"></i></button>
+                                                                </form>
 
                                                                 <!-- Download -->
                                                                 <a href="{{ route('backup.download', $backup['filename']) }}"
@@ -73,11 +72,10 @@
                                                                 </a>
 
                                                                 <!-- Delete -->
-                                                                <a href="{{ route('backup.delete', $backup['filename']) }}"
-                                                                    onclick="return confirm('Yakin ingin menghapus file ini?')"
-                                                                    class="btn btn-danger" title="Hapus">
-                                                                    <i data-feather="x"></i>
-                                                                </a>
+                                                                <form action="{{ route('backup.delete', $backup['filename']) }}" method="POST" class="d-inline" onsubmit="return confirm('Yakin ingin menghapus file ini?')">
+                                                                    @csrf @method('DELETE')
+                                                                    <button class="btn btn-danger" title="Hapus"><i data-feather="x"></i></button>
+                                                                </form>
                                                             </div>
                                                         </td>
                                                     </tr>

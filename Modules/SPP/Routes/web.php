@@ -13,16 +13,18 @@
 
 use Illuminate\Support\Facades\Route;
 
-Route::prefix('spp')->middleware('role:Bendahara')->group(function() {
-    Route::get('/', 'SPPController@index');
+Route::prefix('spp')->middleware(['auth', 'active.user', 'role:Bendahara|Admin'])->group(function() {
+    Route::get('/', 'SPPController@index')->name('spp.index');
 
     Route::get('murid','SPPController@murid')->name('spp.murid.index');
     Route::get('murid/detail/{id}','SPPController@detail')->name('spp.murid.detail');
-    Route::get('murid/update-pembayaran','SPPController@updatePembayaran')->name('spp.murid.update.pembayaran');
+    Route::put('murid/update-pembayaran','SPPController@updatePembayaran')->name('spp.murid.update.pembayaran');
+    Route::put('murid/tolak-pembayaran','SPPController@rejectPembayaran')->name('spp.murid.reject.pembayaran');
 
 });
 
-Route::prefix('spp')->middleware('role:Admin')->group(function() {
+Route::prefix('spp')->middleware(['auth', 'active.user', 'role:Admin'])->group(function() {
+    Route::get('/pengaturan','SPPController@setting')->name('spp.setting');
     Route::post('/update','SPPController@update')->name('spp.update');
 });
 

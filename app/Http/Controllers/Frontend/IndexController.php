@@ -33,25 +33,29 @@ class IndexController extends Controller
         $about = About::where('is_Active','0')->first();
 
         // Video
-        $video = Video::where('is_active','0')->first();
+        $videos = Video::where('is_active','0')->orderBy('created_at','desc')->get();
 
         // Pengajar
         $pengajar = User::with('userDetail')->where('status','Aktif')->where('role','Guru')->get();
 
         // Berita
-        $berita = Berita::where('is_active','0')->orderBy('created_at','desc')->get();
+        $berita = Berita::where('is_active','0')->orderBy('created_at','desc')->take(6)->get();
 
         // Event
-        $event = Events::where('is_active','0')->orderBy('created_at','desc')->get();
+        $event = Events::where('is_active','0')
+            ->where('acara', '>=', now()->startOfDay())
+            ->orderBy('acara')
+            ->take(4)
+            ->get();
 
         // Footer
         $footer = Footer::first();
 
-        return view('frontend.welcome', compact('jurusanM','kegiatanM','slider','about','video','pengajar','berita','event','footer'));
+        return view('frontend.welcome', compact('jurusanM','kegiatanM','slider','about','videos','pengajar','berita','event','footer'));
     }
 
     // Berita
-    public function berita()
+    public function berita(Request $request)
     {
          // Menu
          $jurusanM = Jurusan::where('is_active','0')->get();
@@ -64,9 +68,20 @@ class IndexController extends Controller
          $kategori = KategoriBerita::where('is_active','0')->orderBy('created_at','desc')->get();
          
          // Berita
-         $berita = Berita::where('is_active','0')->orderBy('created_at','desc')->paginate(10);
+         $search = trim((string) $request->query('q'));
+         $berita = Berita::where('is_active','0')
+            ->when($search !== '', function ($query) use ($search) {
+                $query->where(function ($news) use ($search) {
+                    $news->where('title', 'like', '%'.$search.'%')
+                        ->orWhere('desc', 'like', '%'.$search.'%')
+                        ->orWhere('content', 'like', '%'.$search.'%');
+                });
+            })
+            ->orderBy('created_at','desc')
+            ->paginate(10)
+            ->appends(['q' => $search]);
  
-         return view('frontend.content.beritaAll', compact('berita','kategori','jurusanM','kegiatanM','footer'));
+         return view('frontend.content.beritaAll', compact('berita','kategori','jurusanM','kegiatanM','footer','search'));
     }
     // Show Detail Berita
     public function detailBerita($slug)
@@ -156,6 +171,15 @@ class IndexController extends Controller
 
         $visimisi = Visimisi::first();
         return view('frontend.content.visimisi', compact('visimisi','jurusanM','kegiatanM','pengajar','footer'));
+    }
+
+    public function alumni()
+    {
+        $jurusanM = Jurusan::where('is_active','0')->get();
+        $kegiatanM = Kegiatan::where('is_active','0')->get();
+        $footer = Footer::first();
+        $alumni = User::with('muridDetail')->where('role','Alumni')->where('status','Aktif')->orderBy('name')->paginate(24);
+        return view('frontend.content.alumni', compact('alumni','jurusanM','kegiatanM','footer'));
     }
 
 }

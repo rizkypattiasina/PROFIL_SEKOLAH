@@ -7,10 +7,11 @@
         <div id="slider-direction-1" class="t-cn slider-direction">
             <div class="slider-content s-tb slide-1">
                 <div class="title-container s-tb-c">
-                    <div class="title1">Achieve Your Dream With Us</div>
-                    <p>Kini Mendaftar ke SMK Yadika Natar lebih Mudah Daftar dari rumah dan tes dari rumah.</p>
+                    <div class="ppdb-hero-label">PPDB {{ date('Y') }}/{{ date('Y') + 1 }}</div>
+                    <div class="title1">Wujudkan Masa Depan Terbaikmu</div>
+                    <p>Pendaftaran peserta didik baru SMA Plus Muhammadiyah Merauke kini lebih mudah, aman, dan dapat dilakukan secara online.</p>
                     <div class="slider-btn-area">
-                        <a href="{{route('register')}}" class="default-big-btn">Daftar</a>
+                        <a href="{{route('ppdb.register')}}" class="default-big-btn">Daftar Sekarang</a>
                     </div>
                 </div>
             </div>
@@ -18,10 +19,11 @@
         <div id="slider-direction-2" class="t-cn slider-direction">
             <div class="slider-content s-tb slide-2">
                 <div class="title-container s-tb-c">
-                    <div class="title1">Best Education For You</div>
-                    <p>Jadikan Sekolah SMK Yadika Natar sebagai tempat dirimu menggapai mimpi.</p>
+                    <div class="ppdb-hero-label">Sekolah Unggul & Berkarakter</div>
+                    <div class="title1">Belajar, Bertumbuh, dan Berprestasi</div>
+                    <p>Bergabunglah dalam lingkungan belajar Islami yang mendukung potensi akademik, karakter, dan kreativitas peserta didik.</p>
                     <div class="slider-btn-area">
-                        <a href="{{route('register')}}" class="default-big-btn">Daftar</a>
+                        <a href="{{route('ppdb.register')}}" class="default-big-btn">Daftar Sekarang</a>
                     </div>
                 </div>
             </div>

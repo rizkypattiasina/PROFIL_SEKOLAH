@@ -43,6 +43,7 @@
                         <form action="{{route('pembayaran.update', $payment->id)}}" method="post" enctype="multipart/form-data">
                             @csrf
                             @method('PUT')
+                            <input type="hidden" name="existing_file" value="{{ $payment->file }}">
                             <div class="form-group">
                                 <label for="Atas Nama">Nama Pengirim</label>
                                 <input type="text" name="sender" class="form-control @error('sender') is-invalid @enderror" value="{{$payment->sender}}" placeholder="Atas Nama" autocomplete="off">
@@ -72,7 +73,7 @@
                                 <label for="Bank Tujuan">Bank Tujuan</label>
                                 <select name="destination_bank" class="form-control select2 @error('destination_bank') is-invalid @enderror">
                                     <option value="">-- Pilih Bank --</option>
-                                    @foreach ($accountbanks->banks as $banks)
+                                    @foreach ($accountbanks as $banks)
                                         <option value="{{$banks->bank_name}}" {{$payment->destination_bank == $banks->bank_name ? 'selected' : ''}}>{{$banks->bank_name}}</option>
                                     @endforeach
                                 </select>
@@ -126,14 +127,9 @@
                 <div class="card shadow">
                 <div class="card-body">
                     <div class="d-flex justify-content-between">
-                        @php
-                            $p = new NumberFormatter("id", NumberFormatter::SPELLOUT);
-                            $result = preg_replace("/\..+/", "", $payment->amount);
-                        @endphp
                     <span>
                         Jumlah :
                         <span style="font-weight: bold">Rp {{number_format($payment->amount)}}</span>
-                        <small style="font-style: italic; font-size:10px; color:brown">{{ ucwords($p->format($result))}} Rupiah</small>
                     </span>
                     <span style="font-size: 21px">
                         <i class="feather icon-credit-card"></i>
@@ -142,13 +138,15 @@
                     <hr>
                     <div class="d-flex justify-content-between">
                     <span>
-                        @foreach ($accountbanks->banks as $bank)
+                        @forelse ($accountbanks as $bank)
                         <ul>
                             <li style="color:cadetblue; font-weight:bold">{{$bank->bank_name}}</li>
                             <li>{{$bank->account_name}}</li>
                             <li>{{$bank->account_number}}</li>
                         </ul>
-                        @endforeach
+                        @empty
+                            <div class="alert alert-warning mb-0">Rekening sekolah belum diatur. Silakan hubungi admin atau bendahara.</div>
+                        @endforelse
                     </span>
                     </div>
                     <hr>

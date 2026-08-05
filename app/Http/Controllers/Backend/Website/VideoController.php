@@ -7,7 +7,6 @@ use App\Http\Requests\VideoRequest;
 use App\Models\Video;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 use Throwable;
 
@@ -45,28 +44,13 @@ class VideoController extends Controller
         $validated = $request->validated();
 
         try {
-            DB::transaction(function () use ($validated) {
-                /*
-                 * Berdasarkan kode lama:
-                 * nilai 0 dianggap sebagai video yang sedang aktif.
-                 *
-                 * Jika video baru dibuat aktif, video aktif lain
-                 * diubah menjadi tidak aktif.
-                 */
-                if ((string) $validated['is_active'] === '0') {
-                    Video::where('is_active', '0')
-                        ->update([
-                            'is_active' => '1',
-                        ]);
-                }
-
-                Video::create([
-                    'title' => $validated['title'],
-                    'desc' => $validated['desc'],
-                    'url' => $validated['url'],
-                    'is_active' => $validated['is_active'],
-                ]);
-            });
+            Video::create([
+                'title' => $validated['title'],
+                'desc' => $validated['desc'],
+                'url' => $validated['url'],
+                // Semua video baru langsung tampil, kecuali admin memilih tidak aktif.
+                'is_active' => $validated['is_active'] ?? '0',
+            ]);
 
             return redirect()
                 ->route('backend-video.index')
@@ -110,28 +94,13 @@ class VideoController extends Controller
         $validated = $request->validated();
 
         try {
-            DB::transaction(function () use ($validated, $id) {
-                $video = Video::findOrFail($id);
-
-                /*
-                 * Jika video ini diaktifkan, nonaktifkan video aktif lain.
-                 * Video yang sedang diperbarui dikecualikan.
-                 */
-                if ((string) $validated['is_active'] === '0') {
-                    Video::where('id', '!=', $video->id)
-                        ->where('is_active', '0')
-                        ->update([
-                            'is_active' => '1',
-                        ]);
-                }
-
-                $video->update([
-                    'title' => $validated['title'],
-                    'desc' => $validated['desc'],
-                    'url' => $validated['url'],
-                    'is_active' => $validated['is_active'],
-                ]);
-            });
+            $video = Video::findOrFail($id);
+            $video->update([
+                'title' => $validated['title'],
+                'desc' => $validated['desc'],
+                'url' => $validated['url'],
+                'is_active' => $validated['is_active'] ?? '0',
+            ]);
 
             return redirect()
                 ->route('backend-video.index')

@@ -82,7 +82,7 @@
                                     <div role="tabpanel" class="tab-pane active" id="account-vertical-bank" aria-labelledby="account-pill-bank" aria-expanded="true">
                                       @if (Auth::user()->bank == NULL)
                                         <!-- form -->
-                                        <form class="validate-form mt-2" action="{{{route('settings.add.bank')}}}" method="POST">
+                                        <form class="validate-form mt-2" action="{{ route('settings.add.bank') }}" method="POST">
                                             @csrf
                                             <div class="row">
                                                 <div class="col-12 col-sm-6">
@@ -126,7 +126,7 @@
                                                 </div>
                                                 <div class="col-12">
                                                     <button type="submit" class="btn btn-primary mt-2 mr-1">Tambah</button>
-                                                    <a href="/home" class="btn btn-outline-secondary mt-2">Batal</a>
+                                                    <a href="{{ route('home') }}" class="btn btn-outline-secondary mt-2">Batal</a>
                                                 </div>
                                             </div>
                                         </form>
@@ -167,6 +167,7 @@
                                     <div class="tab-pane fade" id="sppsetting" role="tabpanel" aria-labelledby="spp-settings" aria-expanded="false">
                                         <form action="{{ route('spp.update') }}" method="POST">
                                             @csrf
+                                            <input type="hidden" name="apply_existing" value="1">
                                             <label for="amount">Biaya SPP</label>
                                             <input type="number" name="amount" id="rupiahInput" value="{{ $spp->amount ?? 0 }}" class="form-control mb-2" style="width: 50%;">
                                             @error('amount')

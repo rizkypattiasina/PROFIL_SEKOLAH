@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use App\Http\Requests\FooterRequest;
 use ErrorException;
 use Session;
+use Illuminate\Support\Facades\Storage;
 
 class FooterController extends Controller
 {
@@ -41,23 +42,17 @@ class FooterController extends Controller
     public function store(FooterRequest $request)
     {
         try {
-            $image = $request->file('logo');
-            $nama_image = time()."_".$image->getClientOriginalName();
-            // isi dengan nama folder tempat kemana file diupload
-            $tujuan_upload = 'public/images/logo';
-            $image->storeAs($tujuan_upload,$nama_image);
-
-            $footer = new Footer;
-            $footer->facebook   = $request->facebook;
-            $footer->instagram  = $request->instagram;
-            $footer->twitter    = $request->twitter;
-            $footer->youtube    = $request->youtube;
-            $footer->logo       = $nama_image;
-            $footer->email      = $request->email;
-            $footer->telp       = $request->telp;
-            $footer->whatsapp   = $request->whatsapp;
-            $footer->desc       = $request->desc;
-            $footer->save();
+            $data = $request->safe()->except(['logo','favicon']);
+            foreach (['facebook','instagram','twitter','youtube','telp','whatsapp','email','desc'] as $field) {
+                $data[$field] = $data[$field] ?? '';
+            }
+            if ($request->hasFile('logo')) {
+                $data['logo'] = $request->file('logo')->store('images/logo', 'public');
+            }
+            if ($request->hasFile('favicon')) {
+                $data['favicon'] = $request->file('favicon')->store('images/favicon', 'public');
+            }
+            Footer::create($data);
 
             Session::flash('success','Data Berhasil dibuat !');
             return redirect()->route('backend-footer.index');
@@ -98,25 +93,18 @@ class FooterController extends Controller
     public function update(FooterRequest $request, $id)
     {
         try {
-            if ($request->logo) {
-                $image = $request->file('logo');
-                $nama_image = time()."_".$image->getClientOriginalName();
-                // isi dengan nama folder tempat kemana file diupload
-                $tujuan_upload = 'public/images/logo';
-                $image->storeAs($tujuan_upload,$nama_image);
+            $footer = Footer::findOrFail($id);
+            $data = $request->safe()->except(['logo','favicon']);
+            foreach (['facebook','instagram','twitter','youtube','telp','whatsapp','email','desc'] as $field) {
+                $data[$field] = $data[$field] ?? '';
             }
-
-            $footer = Footer::find($id);
-            $footer->facebook   = $request->facebook;
-            $footer->instagram  = $request->instagram;
-            $footer->twitter    = $request->twitter;
-            $footer->youtube    = $request->youtube;
-            $footer->logo       = $nama_image ?? $footer->logo;
-            $footer->email      = $request->email;
-            $footer->telp       = $request->telp;
-            $footer->whatsapp   = $request->whatsapp;
-            $footer->desc       = $request->desc;
-            $footer->save();
+            foreach (['logo' => 'images/logo', 'favicon' => 'images/favicon'] as $field => $folder) {
+                if ($request->hasFile($field)) {
+                    if ($footer->{$field}) Storage::disk('public')->delete($footer->{$field});
+                    $data[$field] = $request->file($field)->store($folder, 'public');
+                }
+            }
+            $footer->update($data);
 
             Session::flash('success','Data Berhasil diupdate !');
             return redirect()->route('backend-footer.index');

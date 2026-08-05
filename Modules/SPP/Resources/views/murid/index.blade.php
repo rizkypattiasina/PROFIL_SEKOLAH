@@ -1,108 +1,59 @@
 @extends('layouts.backend.app')
 
-@section('title')
-    Data Pembayaran Murid
-@endsection
+@section('title', 'Pembayaran Murid')
 
 @section('content')
-
-    @if ($message = Session::get('success'))
-        <div class="alert alert-success" role="alert">
-            <div class="alert-body">
-                <strong>{{ $message }}</strong>
-                <button type="button" class="close" data-dismiss="alert">×</button>
-            </div>
-        </div>
-    @elseif($message = Session::get('error'))
-        <div class="alert alert-danger" role="alert">
-            <div class="alert-body">
-                <strong>{{ $message }}</strong>
-                <button type="button" class="close" data-dismiss="alert">×</button>
-            </div>
-        </div>
-    @endif
 <div class="content-wrapper container-xxl p-0">
+    @if(session('success'))<div class="alert alert-success"><div class="alert-body"><strong>{{ session('success') }}</strong></div></div>@endif
+    @if(session('error'))<div class="alert alert-danger"><div class="alert-body"><strong>{{ session('error') }}</strong></div></div>@endif
+
     <div class="content-header row">
-        <div class="content-header-left col-md-9 col-12 mb-2">
-            <div class="row breadcrumbs-top">
-                <div class="col-12">
-                    <h2> Data Pembayaran Murid</h2>
-                </div>
-            </div>
+        <div class="content-header-left col-md-8 col-12 mb-2">
+            <h2 class="content-header-title">Pembayaran Murid {{ $year }}</h2>
+            <p class="text-muted mb-0">Status lunas dan sisa tagihan dihitung dari 12 bulan SPP.</p>
+        </div>
+        <div class="content-header-right col-md-4 col-12 mb-2 text-md-right">
+            <form method="GET" action="{{ route('spp.murid.index') }}" class="form-inline justify-content-md-end">
+                <select name="year" class="form-control" onchange="this.form.submit()">
+                    @for($optionYear = date('Y') + 1; $optionYear >= 2020; $optionYear--)
+                        <option value="{{ $optionYear }}" {{ (int) $year === $optionYear ? 'selected' : '' }}>{{ $optionYear }}</option>
+                    @endfor
+                </select>
+            </form>
         </div>
     </div>
+
     <div class="content-body">
-        <div class="row">
-            <div class="col-12">
-                <section>
-                    <div class="row">
-                        <div class="col-12">
-                            <div class="card">
-                                <div class="card-header border-bottom">
-                                    <h4 class="card-title">Data Pembayaran Murid</h4>
-                                </div>
-                                <div class="card-datatable">
-                                    <table class="dt-responsive table">
-                                        <thead>
-                                            <tr>
-                                                <th></th>
-                                                <th>No</th>
-                                                <th>NISN</th>
-                                                <th>Nama</th>
-                                                <th>Email</th>
-                                                <th>Pembayaran Bulan {{Date('F')}} </th>
-                                                <th>Status</th>
-                                                <th>Action</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @foreach ($payment as $key => $payments)
-                                                <tr>
-                                                    <td></td>
-                                                    <td> {{$key+1}} </td>
-                                                    <td> {{$payments->muridDetail->nisn}} </td>
-                                                    <td> {{$payments->name}} </td>
-                                                    <td> {{$payments->email}} </td>
-                                                    <td>
-                                                      @if (Date('m') == 1)
-                                                        <span class="badge badge-{{$payments->payment->January == 'paid' ? 'info' : 'warning'}}">{{strtoupper($payments->payment->January)}}</span>
-                                                      @elseif(Date('m') == 2)
-                                                        <span class="badge badge-{{$payments->payment->Febuary == 'paid' ? 'info' : 'warning'}}">{{strtoupper($payments->payment->Febuary)}}</span>
-                                                      @elseif(Date('m') == 3)
-                                                       <span class="badge badge-{{$payments->payment->March == 'paid' ? 'info' : 'warning'}}">{{strtoupper($payments->payment->March)}}</span>
-                                                      @elseif(Date('m') == 4)
-                                                       <span class="badge badge-{{$payments->payment->April == 'paid' ? 'info' : 'warning'}}">{{strtoupper($payments->payment->April)}}</span>
-                                                      @elseif(Date('m') == 5)
-                                                        <span class="badge badge-{{$payments->payment->Mey == 'paid' ? 'info' : 'warning'}}">{{strtoupper($payments->payment->Mey)}}</span>
-                                                      @elseif(Date('m') == 6)
-                                                        <span class="badge badge-{{$payments->payment->Juny == 'paid' ? 'info' : 'warning'}}">{{strtoupper($payments->payment->Juny)}}</span>
-                                                      @elseif(Date('m') == 7)
-                                                        <span class="badge badge-{{$payments->payment->July == 'paid' ? 'info' : 'warning'}}">{{strtoupper($payments->payment->July)}}</span>
-                                                      @elseif(Date('m') == 8)
-                                                        <span class="badge badge-{{$payments->payment->August == 'paid' ? 'info' : 'warning'}}">{{strtoupper($payments->payment->August)}}</span>
-                                                      @elseif(Date('m') == 9)
-                                                        <span class="badge badge-{{$payments->payment->September == 'paid' ? 'info' : 'warning'}}">{{strtoupper($payments->payment->September)}}</span>
-                                                      @elseif(Date('m') == 10)
-                                                        <span class="badge badge-{{$payments->payment->October == 'paid' ? 'info' : 'warning'}}">{{strtoupper($payments->payment->October)}}</span>
-                                                      @elseif(Date('m') == 11)
-                                                        <span class="badge badge-{{$payments->payment->November == 'paid' ? 'info' : 'warning'}}">{{strtoupper($payments->payment->November)}}</span>
-                                                      @elseif(Date('m') == 12)
-                                                        <span class="badge badge-{{$payments->payment->December == 'paid' ? 'info' : 'warning'}}">{{strtoupper($payments->payment->December)}}</span>
-                                                      @endif
-                                                    </td>
-                                                    <td> <span class="badge badge-info">{{$payments->payment->is_active == 1 ? 'ACTIVE' : 'SUSPEND'}}</span></td>
-                                                    <td>
-                                                        <a href="{{route('spp.murid.detail', $payments->payment->id)}}" class="btn btn-success btn-sm">Detail</a>
-                                                    </td>
-                                                </tr>
-                                            @endforeach
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
+        <div class="card">
+            <div class="card-header border-bottom"><h4 class="card-title">Daftar Pembayaran Murid</h4></div>
+            <div class="table-responsive">
+                <table class="dt-responsive table table-hover">
+                    <thead><tr><th>No</th><th>NISN</th><th>Nama</th><th>Bulan Ini</th><th>Lunas</th><th>Sisa</th><th>Sisa Tagihan</th><th>Aksi</th></tr></thead>
+                    <tbody>
+                    @forelse($payment as $key => $student)
+                        @php
+                            $bill = $student->payments->first();
+                            $details = $bill ? $bill->detailPayment : collect();
+                            $current = $details->firstWhere('month', date('F'));
+                            $paidMonths = $details->where('status', 'paid')->count();
+                            $unpaidMonths = $details->where('status', 'unpaid')->count();
+                            $remaining = $details->where('status', 'unpaid')->sum('amount');
+                        @endphp
+                        <tr>
+                            <td>{{ $key + 1 }}</td>
+                            <td>{{ optional($student->muridDetail)->nisn ?: '-' }}</td>
+                            <td><strong>{{ $student->name }}</strong><br><small>{{ $student->email }}</small></td>
+                            <td><span class="badge badge-{{ optional($current)->status === 'paid' ? 'success' : 'warning' }}">{{ optional($current)->status === 'paid' ? 'Lunas' : 'Belum Lunas' }}</span></td>
+                            <td>{{ $paidMonths }} bulan</td>
+                            <td>{{ $unpaidMonths }} bulan</td>
+                            <td>Rp {{ number_format($remaining, 0, ',', '.') }}</td>
+                            <td>@if($bill)<a href="{{ route('spp.murid.detail', $bill->id) }}" class="btn btn-primary btn-sm">Detail</a>@else<span class="text-muted">Belum ada tagihan</span>@endif</td>
+                        </tr>
+                    @empty
+                        <tr><td colspan="8" class="text-center text-muted py-3">Belum ada murid aktif.</td></tr>
+                    @endforelse
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>

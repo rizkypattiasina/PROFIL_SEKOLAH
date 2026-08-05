@@ -2,139 +2,185 @@
 
 namespace Modules\SPP\Http\Controllers;
 
-use App\Helpers\GlobalHelpers;
 use App\Models\User;
 use Carbon\Carbon;
-use ErrorException;
-use Exception;
-use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Session;
-use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Storage;
 use Modules\SPP\Entities\DetailPaymentSpp;
 use Modules\SPP\Entities\PaymentSpp;
 use Modules\SPP\Entities\SppSetting;
-use PhpParser\Node\Stmt\Return_;
+use Modules\SPP\Services\SppBillingService;
 
 class SPPController extends Controller
 {
-    use GlobalHelpers;
-    public function index()
+    private $billing;
+
+    public function __construct(SppBillingService $billing)
     {
-        return view('spp::index');
+        $this->billing = $billing;
     }
 
-    // Murid
-    public function murid()
+    public function index(Request $request)
     {
-        $payment = User::with('payment')
-            ->whereHas('payment', function ($a) {
-                $a->where('year', date('Y'));
-            })
-            ->where('role', 'Murid')->get();
-        return view('spp::murid.index', compact('payment'));
+        $year = $this->selectedYear($request);
+        $this->billing->ensureForAllStudents($year);
+
+        $details = DetailPaymentSpp::whereHas('payment', function ($query) use ($year) {
+            $query->where('year', $year)->where('is_active', 1);
+        });
+
+        $studentCount = PaymentSpp::where('year', $year)->where('is_active', 1)->count();
+        $currentMonthBills = (clone $details)->where('month', date('F'))->count();
+        $paid = (clone $details)->where('status', 'paid')->count();
+        $unpaid = (clone $details)->where('status', 'unpaid')->count();
+        $pending = (clone $details)->where('status', 'unpaid')->whereNotNull('file')->count();
+        $paidAmount = (int) (clone $details)->where('status', 'paid')->sum('amount');
+        $outstandingAmount = (int) (clone $details)->where('status', 'unpaid')->sum('amount');
+
+        return view('spp::index', compact(
+            'year', 'studentCount', 'currentMonthBills', 'paid', 'unpaid',
+            'pending', 'paidAmount', 'outstandingAmount'
+        ));
     }
 
-    // Detail Pembayaran
+    public function murid(Request $request)
+    {
+        $year = $this->selectedYear($request);
+        $this->billing->ensureForAllStudents($year);
+
+        $payment = User::with([
+                'muridDetail',
+                'payments' => function ($query) use ($year) {
+                    $query->where('year', $year)->with('detailPayment');
+                },
+            ])
+            ->where('role', 'Murid')
+            ->orderBy('name')
+            ->get();
+
+        return view('spp::murid.index', compact('payment', 'year'));
+    }
+
     public function detail($id)
     {
-        $payment = PaymentSpp::with('detailPayment.aprroveBy', 'user.muridDetail')->findOrFail($id);
+        $payment = PaymentSpp::with('detailPayment.approvedBy', 'detailPayment.user.muridDetail', 'user.muridDetail')
+            ->findOrFail($id);
+
+        if ($payment->user) {
+            $payment = $this->billing->ensureForStudent($payment->user, (int) $payment->year);
+            $payment->load('detailPayment.approvedBy', 'detailPayment.user.muridDetail', 'user.muridDetail');
+        }
+
         return view('spp::murid.show', compact('payment'));
     }
 
-    // Update Pembayaran
     public function updatePembayaran(Request $request)
     {
-        try {
-            DB::beginTransaction();
+        $validated = $request->validate([
+            'id_payment' => 'required|integer|exists:detail_payment_spps,id',
+        ]);
 
-            $payment = DetailPaymentSpp::find($request->id_payment);
-            $payment->status        = 'paid';
-            $payment->approve_by    = Auth::id();
-            $payment->approve_date  = Carbon::now();
-            $payment->update();
+        $detail = DB::transaction(function () use ($validated) {
+            $detail = DetailPaymentSpp::lockForUpdate()->findOrFail($validated['id_payment']);
 
-            // Update Payment
-            $pay = PaymentSpp::find($payment->payment_id);
-            if ($payment->month == 'January') {
-                $pay->January = 'paid';
-            } elseif ($payment->month == 'February') {
-                $pay->February = 'paid';
-            } elseif ($payment->month == 'March') {
-                $pay->March = 'paid';
-            } elseif ($payment->month == 'April') {
-                $pay->April = 'paid';
-            } elseif ($payment->month == 'May') {
-                $pay->May = 'paid';
-            } elseif ($payment->month == 'June') {
-                $pay->June = 'paid';
-            } elseif ($payment->month == 'July') {
-                $pay->July = 'paid';
-            } elseif ($payment->month == 'August') {
-                $payment->August = 'paid';
-            } elseif ($payment->month == 'September') {
-                $pay->September = 'paid';
-            } elseif ($payment->month == 'October') {
-                $pay->October = 'paid';
-            } elseif ($payment->month == 'November') {
-                $pay->November = 'paid';
-            } elseif ($payment->month == 'December') {
-                $pay->December = 'paid';
+            if ($detail->status === 'paid') {
+                return $detail;
             }
-            $pay->update();
 
-            DB::commit();
-            Session::flash('success', 'Pembayaran Berhasil Dikonfirmasi.');
-            return $payment;
-        } catch (\ErrorException $e) {
-            DB::rollback();
-            throw new ErrorException($e->getMessage());
+            $detail->update([
+                'status' => 'paid',
+                'approve_by' => Auth::id(),
+                'approve_date' => Carbon::now(),
+            ]);
+
+            $this->billing->syncSummary($detail->payment);
+
+            return $detail->fresh('approvedBy');
+        });
+
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json([
+                'message' => 'Pembayaran berhasil dikonfirmasi.',
+                'payment' => $detail,
+            ]);
         }
+
+        return back()->with('success', 'Pembayaran berhasil dikonfirmasi.');
+    }
+
+    public function rejectPembayaran(Request $request)
+    {
+        $validated = $request->validate([
+            'id_payment' => 'required|integer|exists:detail_payment_spps,id',
+        ]);
+
+        $detail = DetailPaymentSpp::findOrFail($validated['id_payment']);
+
+        if ($detail->status === 'paid') {
+            return back()->with('error', 'Pembayaran yang sudah lunas tidak dapat ditolak.');
+        }
+
+        if ($detail->file) {
+            Storage::disk('public')->delete('images/bukti_payment/'.$detail->file);
+        }
+
+        $detail->update([
+            'file' => null,
+            'date_file' => null,
+            'sender' => null,
+            'bank_sender' => null,
+            'destination_bank' => null,
+            'status' => 'unpaid',
+            'approve_by' => null,
+            'approve_date' => null,
+        ]);
+
+        $this->billing->syncSummary($detail->payment);
+
+        return back()->with('success', 'Bukti pembayaran ditolak. Murid dapat mengunggah ulang.');
     }
 
     public function setting()
     {
-        return view('spp::setting');
+        $setting = SppSetting::with('updateBy')->first();
+
+        return view('spp::setting', compact('setting'));
     }
 
     public function update(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'amount' => 'required|numeric'
+        $validated = $request->validate([
+            'amount' => 'required|integer|min:0|max:2000000000',
+            'apply_existing' => 'nullable|boolean',
         ]);
 
-        if ($validator->fails()) {
-            return back()
-                        ->withErrors($validator)
-                        ->withInput();
-        }
+        DB::transaction(function () use ($validated) {
+            $setting = SppSetting::first();
+            $payload = ['amount' => $validated['amount'], 'update_by' => Auth::id()];
 
-        try {
-            $spp_setting = SppSetting::all();
+            $setting ? $setting->update($payload) : SppSetting::create($payload);
 
-            if ($spp_setting->count() == 0) {
-                SppSetting::create([
-                    'amount' => $request->amount,
-                    'update_by' => auth()->user()->id
-                ]);
-            } else {
-                SppSetting::first()->update([
-                    'amount' => $request->amount,
-                    'update_by' => auth()->user()->id
-                ]);
+            if (! empty($validated['apply_existing'])) {
+                DetailPaymentSpp::where('status', 'unpaid')
+                    ->whereHas('payment', function ($query) {
+                        $query->where('year', date('Y'));
+                    })
+                    ->update(['amount' => $validated['amount']]);
             }
+        });
 
-            DB::commit();
-            Session::flash('success', 'Biaya SPP berhasil diupdate.');
-            return back();
-        } catch (Exception $error) {
-            DB::rollback();
-            Session::flash('error', $error->getMessage());
-            return back();
-        }
+        return back()->with('success', 'Nominal SPP berhasil diperbarui.');
+    }
+
+    private function selectedYear(Request $request): int
+    {
+        $year = (int) $request->query('year', date('Y'));
+
+        return ($year >= 2020 && $year <= ((int) date('Y') + 1))
+            ? $year
+            : (int) date('Y');
     }
 }

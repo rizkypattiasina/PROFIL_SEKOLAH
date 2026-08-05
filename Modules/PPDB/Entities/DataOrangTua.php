@@ -10,4 +10,6 @@ class DataOrangTua extends Model
     use HasFactory;
 
     protected $table = 'data_orang_tuas';
+
+    protected $guarded = [];
 }

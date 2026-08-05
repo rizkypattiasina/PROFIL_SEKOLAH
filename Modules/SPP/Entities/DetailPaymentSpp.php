@@ -13,19 +13,30 @@ class DetailPaymentSpp extends Model
 
     protected $guarded = [];
 
-    protected $appends = ['url_file'];
+    protected $appends = ['url_file', 'month_label'];
+
+    protected $casts = [
+        'date_file' => 'date',
+        'approve_date' => 'date',
+        'amount' => 'integer',
+    ];
 
     public function getUrlFileAttribute()
     {
-        if (!isset($this->file) && $this->file == '') {
+        if (empty($this->file)) {
             return null;
         }
         return asset(Storage::url('images/bukti_payment/' .$this->file));
     }
 
+    public function getMonthLabelAttribute()
+    {
+        return \Modules\SPP\Services\SppBillingService::labelForMonth($this->month);
+    }
+
     public function payment()
     {
-      return $this->hasOne(PaymentSpp::class,'id','payment_id');
+      return $this->belongsTo(PaymentSpp::class,'payment_id');
     }
 
     public function user()
@@ -34,6 +45,11 @@ class DetailPaymentSpp extends Model
     }
 
     public function aprroveBy()
+    {
+      return $this->belongsTo(User::class, 'approve_by');
+    }
+
+    public function approvedBy()
     {
       return $this->belongsTo(User::class, 'approve_by');
     }

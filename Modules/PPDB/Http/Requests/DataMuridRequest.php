@@ -3,6 +3,7 @@
 namespace Modules\PPDB\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class DataMuridRequest extends FormRequest
 {
@@ -15,12 +16,12 @@ class DataMuridRequest extends FormRequest
     {
         return [
             'name'          => 'required',
-            'email'         => 'required|email',
+            'email'         => ['required', 'email', Rule::unique('users')->ignore($this->user()->id)],
             'tempat_lahir'  => 'required',
-            'tgl_lahir'     => 'required',
+            'tgl_lahir'     => 'required|date|before:today',
             'agama'         => 'required',
-            'telp'          => 'required|numeric',
-            'whatsapp'      => 'required|numeric',
+            'telp'          => 'required|digits_between:8,15',
+            'whatsapp'      => 'required|digits_between:10,15',
             'alamat'        => 'required',
             'asal_sekolah'  => 'required'
         ];

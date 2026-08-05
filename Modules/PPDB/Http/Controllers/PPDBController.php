@@ -2,9 +2,12 @@
 
 namespace Modules\PPDB\Http\Controllers;
 
+use App\Models\Footer;
+use App\Models\Video;
 use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Modules\PPDB\Entities\PpdbContent;
 
 class PPDBController extends Controller
 {
@@ -14,7 +17,18 @@ class PPDBController extends Controller
      */
     public function index()
     {
-        return view('ppdb::index');
+        $footer = Footer::first();
+        $ppdbContents = PpdbContent::active()
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->get()
+            ->groupBy('section');
+        $ppdbVideo = Video::where('is_active', '0')
+            ->whereNotNull('url')
+            ->latest()
+            ->first();
+
+        return view('ppdb::index', compact('footer', 'ppdbContents', 'ppdbVideo'));
     }
 
     

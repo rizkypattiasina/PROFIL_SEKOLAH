@@ -11,4 +11,6 @@ class BerkasMurid extends Model
 
     protected $table = 'berkas_murids';
 
+    protected $guarded = [];
+
 }

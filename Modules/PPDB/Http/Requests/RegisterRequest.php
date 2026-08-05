@@ -14,12 +14,12 @@ class RegisterRequest extends FormRequest
     public function rules()
     {
         return [
-            'name'                  => 'required',
+            'name'                  => 'required|string|max:255',
             'email'                 => 'required|email|unique:users',
-            'password'              => 'required',
+            'password'              => 'required|string|min:8|max:72',
             'confirm_password'      => 'required|same:password',
-            'whatsapp'              => 'required|numeric|unique:data_murids',
-            'asal_sekolah'          => 'required'
+            'whatsapp'              => 'required|digits_between:10,15|unique:data_murids',
+            'asal_sekolah'          => 'required|string|max:255'
         ];
     }
 

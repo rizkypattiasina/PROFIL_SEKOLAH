@@ -27,6 +27,15 @@
 <!-- ReImageGrid CSS -->
 <link rel="stylesheet" href="{{asset('Assets/Frontend/css/reImageGrid.css')}}">
 <!-- Custom CSS -->
-<link rel="stylesheet" href="{{asset('Assets/Frontend/style.css')}}">
+@php
+    $mainCssPath = public_path('Assets/Frontend/style.css');
+    $socialFooterCssPath = public_path('Assets/Frontend/css/social-footer.css');
+    $responsiveModernCssPath = public_path('Assets/Frontend/css/responsive-modern.css');
+@endphp
+<link rel="stylesheet" href="{{ asset('Assets/Frontend/style.css') }}?v={{ file_exists($mainCssPath) ? filemtime($mainCssPath) : '1' }}">
+<!-- Media Social & Footer CSS (dipisahkan agar tidak memakai cache lama) -->
+<link rel="stylesheet" href="{{ asset('Assets/Frontend/css/social-footer.css') }}?v={{ file_exists($socialFooterCssPath) ? filemtime($socialFooterCssPath) : '1' }}">
+<!-- Lapisan responsif terakhir untuk header, pengajar, halaman utama, dan footer -->
+<link rel="stylesheet" href="{{ asset('Assets/Frontend/css/responsive-modern.css') }}?v={{ file_exists($responsiveModernCssPath) ? filemtime($responsiveModernCssPath) : '1' }}">
 <!-- Modernizr Js -->
 <script src="{{asset('Assets/Frontend/js/modernizr-2.8.3.min.js')}}"></script>

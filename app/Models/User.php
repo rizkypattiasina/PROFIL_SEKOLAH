@@ -82,6 +82,11 @@ class User extends Authenticatable
       return $this->hasOne(PaymentSpp::class,'user_id');
     }
 
+    public function payments()
+    {
+      return $this->hasMany(PaymentSpp::class, 'user_id');
+    }
+
     public function bank()
     {
       return $this->hasOne(BankAccount::class,'user_id');

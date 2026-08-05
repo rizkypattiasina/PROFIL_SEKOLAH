@@ -13,11 +13,11 @@ use Modules\Backup\Http\Controllers\BackupController;
 |
 */
 
-Route::prefix('backup')->group(function () {
+Route::prefix('backup')->middleware(['auth', 'active.user', 'role:Admin'])->group(function () {
     Route::get('/', 'BackupController@index')->name('backup.index');
     Route::post('/create', [BackupController::class, 'create'])->name('backup.create');
     Route::get('/download/{filename}', [BackupController::class, 'download'])->name('backup.download');
-    Route::get('/delete/{filename}', [BackupController::class, 'destroy'])->name('backup.delete');
-    Route::get('/restore/{filename}', [BackupController::class, 'restore'])->name('backup.restore');
+    Route::delete('/delete/{filename}', [BackupController::class, 'destroy'])->name('backup.delete');
+    Route::post('/restore/{filename}', [BackupController::class, 'restore'])->name('backup.restore');
     Route::post('/upload', [BackupController::class, 'upload'])->name('backup.upload');
 });

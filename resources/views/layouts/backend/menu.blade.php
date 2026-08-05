@@ -1,7 +1,7 @@
 <div class="main-menu menu-fixed menu-dark menu-accordion menu-shadow" data-scroll-to-active="true">
     <div class="navbar-header">
         <ul class="nav navbar-nav flex-row">
-            <li class="nav-item mr-auto"><a class="navbar-brand" href="/home"><span class="brand-logo">
+            <li class="nav-item mr-auto"><a class="navbar-brand" href="{{ route('home') }}"><span class="brand-logo">
                         <svg viewbox="0 0 139 95" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" height="24">
                             <defs>
                                 <lineargradient id="linearGradient-1" x1="100%" y1="10.5120544%" x2="50%" y2="89.4879456%">
@@ -35,8 +35,8 @@
     <div class="main-menu-content">
         <ul class="navigation navigation-main" id="main-menu-navigation" data-menu="menu-navigation">
             <li class=" nav-item {{ (request()->is('home')) ? 'active' : '' }}">
-                <a class="d-flex align-items-center" href="/home"><i data-feather="home"></i>
-                    <span class="menu-title text-truncate" data-i18n="Dashboards">Dashboard</span>
+                <a class="d-flex align-items-center" href="{{ route('home') }}"><i data-feather="home"></i>
+                    <span class="menu-title text-truncate" data-i18n="Dashboards">Panel Sekolah</span>
                 </a>
             </li>
 
@@ -114,7 +114,7 @@
 
                     <li class="nav-item {{ (request()->is('backend-footer')) ? 'active' : '' }}">
                         <a class="d-flex align-items-center" href=" {{route('backend-footer.index')}} "><i data-feather="circle"></i>
-                            <span class="menu-item text-truncate" data-i18n="Basic">Footer</span>
+                            <span class="menu-item text-truncate" data-i18n="Basic">Pengaturan Website</span>
                         </a>
                     </li>
 
@@ -156,7 +156,15 @@
                             <span class="menu-item text-truncate" data-i18n="Basic">Bendahara</span>
                         </a>
                     </li>
+                    <li class="nav-item {{ request()->is('backend-alumni*') ? 'active' : '' }}"><a class="d-flex align-items-center" href="{{ route('backend-alumni.index') }}"><i data-feather="circle"></i><span class="menu-item text-truncate">Alumni</span></a></li>
                 </ul>
+            </li>
+
+            <li class="nav-item {{ request()->is('spp*') ? 'active' : '' }}"><a class="d-flex align-items-center" href="#"><i data-feather="credit-card"></i><span class="menu-title text-truncate">Pembayaran</span></a><ul class="menu-content"><li><a class="d-flex align-items-center" href="{{ route('spp.index') }}"><i data-feather="circle"></i><span class="menu-item text-truncate">Dashboard SPP</span></a></li><li><a class="d-flex align-items-center" href="{{ route('spp.murid.index') }}"><i data-feather="circle"></i><span class="menu-item text-truncate">Pembayaran Murid</span></a></li><li><a class="d-flex align-items-center" href="{{ route('spp.setting') }}"><i data-feather="circle"></i><span class="menu-item text-truncate">Nominal SPP</span></a></li></ul></li>
+
+            <li class="nav-item {{ request()->is('ppdb/data-murid*') || request()->is('ppdb/ppdb-content*') ? 'active' : '' }}">
+                <a class="d-flex align-items-center" href="#"><i data-feather="clipboard"></i><span class="menu-title text-truncate">PPDB</span></a>
+                <ul class="menu-content"><li><a class="d-flex align-items-center" href="{{ route('data-murid.index') }}"><i data-feather="circle"></i><span class="menu-item text-truncate">Data Calon Murid</span></a></li><li><a class="d-flex align-items-center" href="{{ route('ppdb-content.index') }}"><i data-feather="circle"></i><span class="menu-item text-truncate">Konten PPDB</span></a></li></ul>
             </li>
 
              <li class=" nav-item {{ (request()->is('backup')) ? 'active' : '' }}">
@@ -197,6 +205,8 @@
                     <span class="menu-title text-truncate" data-i18n="Pendaftaran">Pendaftaran</span>
                 </a>
             </li>
+            <li class="nav-item {{ request()->routeIs('ppdb.form-orangtua*') ? 'active' : '' }}"><a class="d-flex align-items-center" href="{{ route('ppdb.form-orangtua') }}"><i data-feather="users"></i><span class="menu-title text-truncate">Data Orang Tua</span></a></li>
+            <li class="nav-item {{ request()->routeIs('ppdb.form-berkas*') ? 'active' : '' }}"><a class="d-flex align-items-center" href="{{ route('ppdb.form-berkas') }}"><i data-feather="upload-cloud"></i><span class="menu-title text-truncate">Berkas PPDB</span></a></li>
 
             {{-- MENU PPDB --}}
             @elseif(Auth::user()->role == 'PPDB')
@@ -205,6 +215,7 @@
                     <span class="menu-title text-truncate" data-i18n="Data Calon Murid">Data Calon Murid</span>
                 </a>
             </li>
+            <li class="nav-item {{ request()->is('ppdb/ppdb-content*') ? 'active' : '' }}"><a class="d-flex align-items-center" href="{{ route('ppdb-content.index') }}"><i data-feather="edit"></i><span class="menu-title text-truncate">Konten PPDB</span></a></li>
 
             {{-- MENU PERPUSTAKAAN --}}
              @elseif(Auth::user()->role == 'Perpustakaan')
@@ -254,6 +265,7 @@
 
             {{-- MENU BENDAHARA --}}
             @elseif(Auth::user()->role == 'Bendahara')
+              <li class="nav-item {{ request()->routeIs('spp.index') ? 'active' : '' }}"><a class="d-flex align-items-center" href="{{ route('spp.index') }}"><i data-feather="pie-chart"></i><span class="menu-title text-truncate">Dashboard SPP</span></a></li>
               <li class="nav-item {{ (request()->is('spp/murid')) ? 'active' : '' }}">
                 <a class="d-flex align-items-center" href=" {{route('spp.murid.index')}} "><i data-feather="users"></i>
                     <span class="menu-title text-truncate" data-i18n="Books">Pembayaran</span>

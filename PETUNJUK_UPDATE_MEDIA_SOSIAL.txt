@@ -1,0 +1,53 @@
+UPDATE TAMPILAN MEDIA SOSIAL DAN FOOTER SEKOLAHKU
+=================================================
+
+1. Cadangkan folder aplikasi dan database terlebih dahulu.
+2. Timpa file aplikasi menggunakan isi paket pembaruan.
+3. Tambahkan kolom database dengan SALAH SATU cara berikut:
+
+   Cara A (disarankan):
+   Buka Command Prompt di folder sekolahku, lalu jalankan:
+       php artisan migrate
+
+   Cara B (phpMyAdmin):
+   - Pilih database Sekolahku.
+   - Buka tab Import.
+   - Impor file UPDATE_MEDIA_SOSIAL_FOOTER.sql.
+   - Saat pemasangan awal, cukup gunakan salah satu cara di atas.
+
+4. Bersihkan cache Laravel:
+       php artisan optimize:clear
+
+5. Masuk sebagai Admin, lalu buka:
+   Website > Pengaturan Website
+
+6. Isi bagian "Media Sosial & Feed":
+   - Tautan profil Instagram, TikTok, dan YouTube.
+   - Username/nama channel.
+   - URL Post atau Reel Instagram publik.
+   - URL video TikTok publik.
+   - URL video YouTube publik.
+
+   Jika URL video YouTube dikosongkan, halaman utama otomatis memakai
+   video aktif terbaru dari menu Website > Video.
+
+7. Buka halaman utama dan periksa bagian Media Sosial di bawah Pengajar.
+   Periksa juga seluruh tautan pada footer.
+
+8. Jika tampilan masih berupa teks polos atau bertumpuk:
+       php artisan optimize:clear
+
+   Setelah itu tekan Ctrl + F5 di browser. Pastikan URL berikut dapat dibuka
+   dan menampilkan kode CSS (bukan halaman 404):
+       http://localhost:8080/sekolahku/public/Assets/Frontend/css/social-footer.css
+
+   Jika URL tersebut 404, salin kembali folder:
+       public/Assets/Frontend/css
+   dari paket pembaruan ke folder aplikasi Anda.
+
+CATATAN
+-------
+- Post/video harus berstatus publik dan pemilik konten harus mengizinkan embed.
+- Tampilan embed membutuhkan koneksi internet ke Instagram, TikTok, atau YouTube.
+- Bila logo/foto tidak tampil, pastikan symbolic link storage tersedia:
+      php artisan storage:link

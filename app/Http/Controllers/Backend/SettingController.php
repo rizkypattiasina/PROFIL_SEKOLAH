@@ -26,13 +26,20 @@ class SettingController extends Controller
     // Tambah Bank
     public function addBank(Request $request)
     {
+      $validated = $request->validate([
+        'bank_name' => 'required|string|exists:banks,nama_bank',
+        'account_number' => 'required|digits_between:5,18',
+        'account_name' => 'required|string|max:255',
+        'is_active' => 'required|boolean',
+      ]);
+
       try {
         BankAccount::create([
           'user_id'         => Auth::id(),
-          'account_number'  => $request->account_number,
-          'account_name'    => $request->account_name,
-          'bank_name'       => $request->bank_name,
-          'is_active'       => $request->is_active,
+          'account_number'  => $validated['account_number'],
+          'account_name'    => $validated['account_name'],
+          'bank_name'       => $validated['bank_name'],
+          'is_active'       => $validated['is_active'],
           'is_primary'      => 1
         ]);
         Session::flash('success','Akun Bank Berhasil Ditambah.');

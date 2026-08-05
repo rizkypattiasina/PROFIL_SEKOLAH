@@ -1,0 +1,69 @@
+UPDATE PROFESIONAL WEBSITE SEKOLAHKU
+====================================
+
+Lokasi proyek XAMPP:
+C:\xampp\htdocs\sekolahku
+
+LANGKAH PEMASANGAN
+1. Backup folder sekolahku dan database lama terlebih dahulu.
+2. Ekstrak ZIP hasil perbaikan.
+3. Salin seluruh isi folder sekolahku ke C:\xampp\htdocs\sekolahku dan pilih Replace.
+4. Jangan menimpa file .env apabila konfigurasi database lokal Anda berbeda.
+   Pastikan nilai berikut tersedia di .env:
+
+   APP_URL=http://localhost:8080/sekolahku/public
+   SESSION_COOKIE=sekolahku_session
+   SESSION_PATH=/sekolahku/public
+   SESSION_EXPIRE_ON_CLOSE=true
+5. Buka PowerShell, lalu jalankan:
+
+   cd C:\xampp\htdocs\sekolahku
+   C:\xampp\php\php.exe artisan migrate
+   C:\xampp\php\php.exe artisan storage:link
+   C:\xampp\php\php.exe artisan optimize:clear
+
+6. Restart Apache dan MySQL melalui XAMPP.
+7. Buka http://localhost:8080/sekolahku/public/ atau sesuaikan port Apache.
+8. Tekan Ctrl+F5.
+
+MENU BARU/PERBAIKAN
+- Admin > Website > Pengaturan Website: logo, favicon, nama sekolah, tagline,
+  warna utama, warna aksen, alamat, kontak, dan media sosial.
+- Admin > Pembayaran: dashboard SPP, pembayaran murid, dan nominal SPP.
+- Tagihan SPP dibuat lengkap untuk 12 bulan pada setiap tahun. Halaman
+  pembayaran menampilkan jumlah bulan lunas, sisa bulan, nilai terbayar,
+  sisa tagihan, dan bukti yang menunggu verifikasi.
+- Admin > PPDB > Data Calon Murid: verifikasi biodata/orang tua/berkas,
+  menerima calon murid, menolak pendaftaran, dan membuat tagihan SPP saat
+  calon murid diterima.
+- Admin/Staff PPDB > Konten PPDB: mengelola Program, Alur, Berkas, dan
+  Informasi yang tampil pada halaman PPDB publik.
+- Admin > Pengguna > Alumni: memindahkan murid lulus ke direktori alumni.
+- Halaman publik > Alumni: menampilkan daftar alumni aktif.
+- PPDB mempunyai route pendaftaran khusus dan tidak lagi bentrok dengan route
+  register/login utama Laravel.
+- Video YouTube aktif dapat diputar langsung pada card halaman utama.
+- Splash pergantian halaman menggunakan logo website yang diatur admin.
+- Logo header/footer kembali ke halaman utama dan galeri Photos pada footer
+  mengambil enam foto berita terbaru.
+- Semua tautan dashboard memakai route aplikasi sehingga tetap menuju
+  http://localhost:8080/sekolahku/public/home.
+
+CATATAN ROLE
+- Admin: seluruh pengaturan website, pengguna, PPDB, pembayaran, dan alumni.
+- PPDB: verifikasi serta pengelolaan calon siswa.
+- Guest: akun pendaftar dan formulir PPDB.
+- Bendahara: pengelolaan serta konfirmasi pembayaran SPP.
+- Murid: melihat dan mengunggah konfirmasi pembayaran sendiri.
+- Alumni: ditampilkan pada direktori alumni publik.
+
+Jika logo tidak tampil, jalankan kembali artisan storage:link. Jika pesan
+"The link already exists" muncul, tautan storage sudah tersedia dan aman.
+
+CATATAN SESI DAN KEAMANAN
+- Halaman utama bersifat publik. Pengguna yang masih mempunyai sesi login
+  akan tetap melihat tombol Dashboard; ini normal dan tidak melewati login.
+- Klik Logout untuk mengakhiri sesi. Sesi juga berakhir ketika browser
+  ditutup apabila SESSION_EXPIRE_ON_CLOSE=true.
+- Area admin, backup, SPP, PPDB, perpustakaan, dan murid dilindungi oleh
+  autentikasi, status akun aktif, serta role yang sesuai.
